@@ -94,7 +94,7 @@ The browser uses echo cancellation, noise suppression, a stateful microphone res
 
 ## Data and access
 
-- Local mode binds to `127.0.0.1`. `DEPLOYMENT_TARGET=render` enables public hosting with exact frontend origins, a demo access code, secure cookies and one-use voice tickets. Live banking mode remains disabled.
+- Local mode binds to `127.0.0.1`. `DEPLOYMENT_TARGET=render` enables public hosting with exact frontend origins, secure session cookies and one-use voice tickets. Live banking mode remains disabled.
 - A random, HttpOnly, SameSite=Strict cookie grants access to one synthetic session. This is demo-session isolation, **not bank customer authentication**.
 - Cookie access secrets are hashed in SQLite. API keys are never returned by the browser API or stored in the database.
 - Database directory/file permissions are restricted. SQLite is plaintext and should contain **synthetic data only**.

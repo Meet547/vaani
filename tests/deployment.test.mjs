@@ -7,25 +7,19 @@ import {tmpdir} from 'node:os';
 import {request as httpRequest} from 'node:http';
 import WebSocket from 'ws';
 import {loadDeployment,httpsOrigin} from '../lib/deployment.mjs';
-import {DemoAccess,VoiceTickets} from '../lib/transport-auth.mjs';
+import {VoiceTickets} from '../lib/transport-auth.mjs';
 import {buildFrontend} from '../scripts/build-frontend.mjs';
 import {createApplication} from '../server.mjs';
 import {Store} from '../lib/store.mjs';
 
-const env={DEPLOYMENT_TARGET:'render',PUBLIC_BACKEND_URL:'https://vaani-api.example',FRONTEND_ORIGINS:'https://vaani.example',DATABASE_PATH:'/var/data/vaani/aria.sqlite',DEMO_ACCESS_CODE:'test-access-code-not-a-secret'};
-test('hosted deployment requires explicit origins, protected access and persistent database path',()=>{
-  const config=loadDeployment(env);assert.equal(config.host,'0.0.0.0');assert.equal(config.secure,true);
-  for(const key of ['FRONTEND_ORIGINS','PUBLIC_BACKEND_URL','DATABASE_PATH','DEMO_ACCESS_CODE'])assert.throws(()=>loadDeployment({...env,[key]:''}));
+const env={DEPLOYMENT_TARGET:'render',PUBLIC_BACKEND_URL:'https://vaani-api.example',FRONTEND_ORIGINS:'https://vaani.example',DATABASE_PATH:'/var/data/vaani/aria.sqlite'};
+test('hosted deployment requires explicit origins and an absolute database path',()=>{
+  const config=loadDeployment(env);assert.equal(config.host,'0.0.0.0');assert.equal(config.secure,true);assert.equal('accessCode' in config,false);
+  for(const key of ['FRONTEND_ORIGINS','PUBLIC_BACKEND_URL','DATABASE_PATH'])assert.throws(()=>loadDeployment({...env,[key]:''}));
   for(const value of ['http://api.example','https://user:pass@api.example','https://api.example/path','https://api.example/?key=secret','https://*.vercel.app']){
     if(value.includes('*'))assert.throws(()=>loadDeployment({...env,FRONTEND_ORIGINS:value}));else assert.throws(()=>httpsOrigin(value));
   }
   assert.equal(loadDeployment({}).host,'127.0.0.1');assert.throws(()=>loadDeployment({DEPLOYMENT_TARGET:'anything'}));
-});
-test('demo access signatures reject wrong codes, tampering and expired cookies',()=>{
-  let now=100000;const gate=new DemoAccess(env.DEMO_ACCESS_CODE,()=>now);
-  assert.ok(gate.matches(env.DEMO_ACCESS_CODE));assert.ok(!gate.matches('incorrect'));
-  const token=gate.issue();assert.ok(gate.valid(token));assert.ok(!gate.valid(token+'x'));assert.ok(!gate.valid(null));
-  now+=86400001;assert.ok(!gate.valid(token));assert.ok(new DemoAccess(null).valid(null));
 });
 test('voice tickets are origin-bound, expire and cannot be replayed',()=>{
   let now=0;const tickets=new VoiceTickets(()=>now),token=tickets.issue('session-secret','https://vaani.example');
@@ -38,11 +32,13 @@ test('Vercel build publishes only frontend assets, proxies API requests and allo
   const config=await buildFrontend({backendUrl:env.PUBLIC_BACKEND_URL,outputDirectory});
   assert.equal(config.version,3);assert.equal(config.routes.find(r=>r.src==='/api/(.*)').dest,'https://vaani-api.example/api/$1');
   const headers=config.routes[0].headers;assert.match(headers['Content-Security-Policy'],/wss:\/\/vaani-api.example/);assert.equal(headers['Cache-Control'],'no-store');
-  assert.deepEqual((await readdir(join(outputDirectory,'static'))).sort(),['access.css','app.js','demo-backup.wav','index.html','mic-worklet.js','style.css']);
-  const built=await readFile(join(outputDirectory,'config.json'),'utf8');assert.ok(!built.includes(env.DEMO_ACCESS_CODE));assert.ok(!built.includes('API_KEY'));
+  assert.deepEqual((await readdir(join(outputDirectory,'static'))).sort(),['app.js','demo-backup.wav','index.html','mic-worklet.js','style.css']);
+  const built=await readFile(join(outputDirectory,'config.json'),'utf8');assert.ok(!built.includes('API_KEY'));
+  assert.doesNotMatch(await readFile(join(outputDirectory,'static','index.html'),'utf8'),/access-panel|access-code/);
+  assert.doesNotMatch(await readFile(join(outputDirectory,'static','app.js'),'utf8'),/\/api\/access|access-form/);
   await assert.rejects(()=>buildFrontend({backendUrl:'https://unsafe.example/path',outputDirectory}));
 });
-test('hosted API login, proxied session cookies and direct ticket-authenticated WebSocket work together',async t=>{
+test('public hosted API, secure session cookies and ticket-authenticated WebSocket work together',async t=>{
   // Model the proxy's upstream Host explicitly; browser fetch owns its Host header.
   const fetch=(url,options={})=>new Promise((resolve,reject)=>{
     const req=httpRequest(url,{method:options.method||'GET',headers:options.headers},res=>{
@@ -55,17 +51,14 @@ test('hosted API login, proxied session cookies and direct ticket-authenticated 
   const base=`http://127.0.0.1:${app.server.address().port}`;
   const headers={Host:'vaani-api.example',Origin:'https://vaani.example','Content-Type':'application/json'};
   assert.equal((await fetch(base+'/api/health',{headers})).status,200);
-  assert.equal((await fetch(base+'/api/config',{headers})).status,401);
-  assert.equal((await fetch(base+'/api/access',{method:'POST',headers:{...headers,Origin:'https://evil.example'},body:JSON.stringify({code:env.DEMO_ACCESS_CODE})})).status,403);
-  assert.equal((await fetch(base+'/api/access',{method:'POST',headers,body:'{"code":"wrong"}'})).status,401);
-  const login=await fetch(base+'/api/access',{method:'POST',headers,body:JSON.stringify({code:env.DEMO_ACCESS_CODE})});assert.equal(login.status,200);
-  const gate=login.headers.get('set-cookie');assert.match(gate,/__Host-vaani_demo=.*HttpOnly; SameSite=Strict; Path=\/; Max-Age=86400; Secure/);
-  headers.Cookie=gate.split(';')[0];
   assert.equal((await fetch(base+'/api/config',{headers})).status,200);
-  assert.equal((await fetch(base+'/api/access',{headers})).status,200);
+  assert.equal((await fetch(base+'/api/access',{headers})).status,404);
+  assert.equal((await fetch(base+'/api/access',{method:'POST',headers,body:'{}'})).status,405);
+  assert.equal((await fetch(base+'/api/session',{headers})).status,401);
+  assert.equal((await fetch(base+'/api/sessions',{method:'POST',headers:{...headers,Origin:'https://evil.example'},body:'{}'})).status,403);
   const created=await fetch(base+'/api/sessions',{method:'POST',headers,body:JSON.stringify({customerId:'H-CARD-1'})});assert.equal(created.status,201);
   assert.match(created.headers.get('set-cookie'),/^__Host-vaani_session=.*; Secure$/);
-  headers.Cookie+='; '+created.headers.get('set-cookie').split(';')[0];const session=(await created.json()).session;
+  headers.Cookie=created.headers.get('set-cookie').split(';')[0];const session=(await created.json()).session;
   assert.equal((await fetch(base+'/api/session',{headers}).then(r=>r.json())).session.id,session.id);
   assert.equal((await fetch(base+'/api/voice-ticket',{method:'POST',headers:{...headers,Origin:'https://evil.example'}})).status,403);
   const connection=await fetch(base+'/api/voice-ticket',{method:'POST',headers}).then(r=>r.json());assert.equal(connection.url,'wss://vaani-api.example/voice');

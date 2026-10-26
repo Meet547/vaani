@@ -4,13 +4,12 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#f5f4ef"><title>Vaani — a conversation, naturally.</title>
   <meta name="description" content="A voice-first synthetic banking demo. Meet Aria, explore 250 customer profiles, and try thoughtful card conversations with clear policy controls.">
-  <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/access.css"><script type="module" src="/app.js"></script>
+  <link rel="stylesheet" href="/style.css"><script type="module" src="/app.js"></script>
 </head>
 <body>
   <header class="topbar"><a class="wordmark" href="/" aria-label="Vaani home"><span class="brand-symbol">v</span> vaani<span class="wordmark-dot">.</span></a><div class="header-right"><span class="demo-badge">VOICE LAB</span><span id="connection" class="connection"><i></i> Checking connection</span></div></header>
   <main>
-    <section id="access-panel" class="access-panel" aria-labelledby="access-title" hidden><p class="eyebrow">WELCOME TO VAANI</p><h2 id="access-title">Your invitation to the demo.</h2><p>Enter the access code shared by the host to explore the synthetic accounts and try Aria’s voice.</p><form id="access-form"><label for="access-code">Demo access code</label><div><input id="access-code" type="password" required maxlength="256" autocomplete="off"><button id="access-submit" class="secondary-button" type="submit">Open the demo</button></div><p id="access-error" role="alert"></p></form></section>
-    <div id="app-content" hidden>
+    <div id="app-content">
     <section class="intro"><div><p class="eyebrow">A LITTLE MORE HUMAN</p><h1>A conversation,<br><em>naturally.</em></h1></div><p class="intro-copy">Meet Aria. A thoughtful voice that listens,<br class="desktop"> understands, and takes it one turn at a time.</p></section>
     <section class="customer-directory" aria-label="Customer directory">
       <div class="directory-heading"><div><p class="eyebrow">SYNTHETIC CUSTOMER DIRECTORY</p><h2>One profile. The right conversation.</h2></div><p id="dataset-summary" role="status">Loading customer dataset…</p></div>

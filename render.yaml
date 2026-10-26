@@ -24,8 +24,6 @@ services:
         value: /var/data/vaani/aria.sqlite
       - key: FRONTEND_ORIGINS
         sync: false
-      - key: DEMO_ACCESS_CODE
-        generateValue: true
       - key: SARVAM_API_KEY
         sync: false
       - key: OLLAMA_API_KEY

@@ -4,7 +4,7 @@ This setup hosts the synthetic demo. Aria's card services remain simulated after
 
 ## How the connection works
 
-The browser loads static assets from Vercel. Requests to `/api/*` are rewritten to Render, so session and demo-access cookies stay on the frontend's own origin. They are HttpOnly, Secure and SameSite=Strict in hosted mode.
+The browser loads static assets from Vercel. Requests to `/api/*` are rewritten to Render, so session cookies stay on the frontend's own origin. They are HttpOnly, Secure and SameSite=Strict in hosted mode.
 
 For audio and chat streaming, the frontend requests a one-use, 60-second voice ticket through that API proxy. It then connects directly to Render over `wss://`, presenting the ticket as a WebSocket subprotocol. The ticket is bound to the frontend origin and consumed once. It contains no provider key and is not placed in a URL. This avoids depending on third-party cookies or a WebSocket server inside a Vercel Function.
 
@@ -27,7 +27,6 @@ Set these values in Render:
 - `FRONTEND_ORIGINS`: the exact HTTPS frontend origin from step 1. Multiple approved origins can be comma-separated.
 - `SARVAM_API_KEY`: your speech provider key. Without it, offline chat works but live speech is unavailable.
 - `OLLAMA_API_KEY`: your Ollama Cloud key. Without it, unfamiliar wording uses deterministic clarification.
-- `DEMO_ACCESS_CODE`: the blueprint generates a random value. Copy it from Render's environment settings and share it privately with demo participants. If creating the service manually, supply your own random value of at least 16 characters.
 
 The blueprint also sets `DEPLOYMENT_TARGET=render`, `NODE_ENV=production` and `DATABASE_PATH=/var/data/vaani/aria.sqlite`. Leave Render's `PORT` alone; the process binds to `0.0.0.0` and the platform-provided port. `RENDER_EXTERNAL_URL` supplies the backend's public origin automatically.
 
@@ -45,16 +44,16 @@ Add just this frontend environment variable:
 BACKEND_URL=https://your-service.onrender.com
 ```
 
-Use your actual Render URL. This is a public routing destination, not a credential. **Sarvam, Ollama and the demo access code belong only on Render.** The frontend build fails clearly when `BACKEND_URL` is missing or is not an HTTPS origin.
+Use your actual Render URL. This is a public routing destination, not a credential. **Sarvam and Ollama credentials belong only on Render.** The frontend build fails clearly when `BACKEND_URL` is missing or is not an HTTPS origin.
 
 Deploy. The build copies only the browser assets and generated backup audio. It generates the `/api/*` proxy route, security headers and the exact `wss://` origin for the Content Security Policy. It does not ship the CSV, source briefs, SQLite database or backend code as static assets.
 
-Open the assigned frontend URL, confirm it matches `FRONTEND_ORIGINS`, then enter the demo access code. You should see the customer directory and a ready connection badge.
+Open the assigned frontend URL, confirm it matches `FRONTEND_ORIGINS`, then open the customer directory directly without a login or access code. You should see a ready connection badge.
 
 ## 4. Verify the hosted app
 
-1. Open the frontend in a private browser window. The access-code prompt should appear before any customer data loads. An incorrect code should fail.
-2. Unlock it and confirm the directory reports 250 profiles and 148 ready card demos.
+1. Open the frontend in a private browser window. It should show the customer directory directly with no login or access-code prompt.
+2. Confirm the directory reports 250 profiles and 148 ready card demos.
 3. Start Riya's session, type a fee complaint, and check that the offer uses ₹2,999 with the configured spend condition.
 4. Start Sameer's session, request firm closure, skip points, and confirm. Verify `pending_dues` and a written reference.
 5. Refresh and resume. Verify the same reference survives.
@@ -72,6 +71,8 @@ You can give previews a separate Render backend and dataset instead of sharing p
 
 ## Storage and capacity
 
+This demo is public; use synthetic customer data and monitor Sarvam/Ollama quota and backend request rates to avoid unexpected costs.
+
 Keep **one backend instance**. SQLite is on one disk and voice tickets live in that process. Multiple instances need a shared database and ticket store before they can safely serve the same sessions. The transport currently allows six simultaneous connections and a 15-minute call limit; other bounds live in `config/runtime.yaml`.
 
 Render's [disk documentation](https://render.com/docs/disks) explains persistence, instance limits and the deployment downtime tradeoff. Back up the live database using a SQLite-aware backup or stop the service before copying its database/WAL files. Do not put database backups or real customer data into Git.
@@ -81,10 +82,10 @@ Render's [disk documentation](https://render.com/docs/disks) explains persistenc
 ## When something does not connect
 
 - **Build says BACKEND_URL is missing:** set it on Vercel and redeploy; use an origin without `/api`.
-- **Backend fails at startup:** check origins, the access-code length, disk/path, Node.js version and [Render logs](https://render.com/docs/troubleshooting-deploys).
+- **Backend fails at startup:** check origins, disk/path, Node.js version and [Render logs](https://render.com/docs/troubleshooting-deploys).
 - **403 / Invalid host:** check `PUBLIC_BACKEND_URL` and Render's automatic hostname. Arbitrary forwarded hosts are not trusted.
 - **403 on a POST or WebSocket:** confirm the exact frontend origin is in `FRONTEND_ORIGINS`.
-- **Access code succeeds but the socket fails:** verify Render's URL, secure `wss://` and the frontend CSP. Reconnect for a fresh ticket; each ticket works once.
+- **The voice socket fails:** verify Render's URL, secure `wss://` and the frontend CSP. Reconnect for a fresh ticket; each ticket works once.
 - **Voice unavailable but chat works:** inspect provider account quota and credentials in Render. Never paste keys into the browser or a GitHub issue.
 - **Sessions disappear after redeploy:** verify the disk is mounted and `DATABASE_PATH` points inside it.
 
