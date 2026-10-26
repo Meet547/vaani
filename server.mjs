@@ -120,7 +120,7 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
         const s=store.authorize(access);if(!s){ws.close(1008,'Session expired.');return;}
         try{
           let fallback;
-          if(!input.action&&(!s.onboarding||s.onboarding.phase==='READY')&&classify(input.text,s).intent==='other'&&credentials.ollama){
+          if(!input.action&&!s.intentClarification&&['ANALYSE','FIND_REASON','DECIDE'].includes(s.state)&&(!s.onboarding||s.onboarding.phase==='READY')&&classify(input.text,s).intent==='other'&&credentials.ollama){
             classifierController=new AbortController();
             try{fallback=await providers.classifyWithModel({key:credentials.ollama,model,text:redact(input.text),signal:classifierController.signal});}
             catch{if(!closed&&!shuttingDown.value)store.audit(sessionId,'GUARDRAIL',{rule:'classifier_unavailable',fallback:'deterministic_clarification'});}

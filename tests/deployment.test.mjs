@@ -37,6 +37,10 @@ test('Vercel build publishes only frontend assets, proxies API requests and allo
   assert.doesNotMatch(await readFile(join(outputDirectory,'static','index.html'),'utf8'),/access-panel|access-code/);
   assert.doesNotMatch(await readFile(join(outputDirectory,'static','app.js'),'utf8'),/\/api\/access|access-form/);
   await assert.rejects(()=>buildFrontend({backendUrl:'https://unsafe.example/path',outputDirectory}));
+  const configured=await buildFrontend({backendUrl:'',outputDirectory});
+  assert.equal(configured.routes[1].dest,'https://vaani-backend-vv52.onrender.com/api/$1');
+  await assert.rejects(()=>buildFrontend({backendUrl:'[https://broken.example/](https://broken.example/)',outputDirectory}),/Set BACKEND_URL on Vercel/);
+  assert.equal(JSON.parse(await readFile(join(outputDirectory,'config.json'),'utf8')).routes[1].dest,configured.routes[1].dest);
 });
 test('public hosted API, secure session cookies and ticket-authenticated WebSocket work together',async t=>{
   // Model the proxy's upstream Host explicitly; browser fetch owns its Host header.

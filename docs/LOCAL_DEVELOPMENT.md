@@ -90,7 +90,7 @@ Recognition uses **Saaras v4** at 16 kHz. Synthesis uses **Bulbul v4 Flash** at 
 
 The browser uses echo cancellation, noise suppression, a stateful microphone resampler and scheduled PCM playback. Sustained local speech or a provider speech-start event interrupts queued audio and aborts the old generation. Turn IDs discard stale audio. Two gentle silence prompts are allowed, but not while muted or after terminal states.
 
-**Gemma 4 31B** classifies unfamiliar masked wording when deterministic rules do not recognize it. A bounded enum validator prevents it from issuing actions or accepting confirmations. Classifier failure falls back to a clarification. All banking responses use reviewed templates with service facts, so unsafe content cannot be streamed before a validator checks it.
+**Gemma 4 31B** suggests an intent for unfamiliar masked wording when deterministic rules do not recognize it. A bounded enum validator prevents it from issuing actions or accepting confirmations. The caller must clarify a non-question suggestion before it can affect the journey. Classifier failure also falls back to clarification. Follow-up answers use validated account fields and saved policy terms; missing details are stated rather than estimated. A textual yes after a factual detour reviews the pending action before applying it. These boundaries reduce conversation drift; they are covered by multi-turn regression tests and still benefit from real voice testing.
 
 ## Data and access
 

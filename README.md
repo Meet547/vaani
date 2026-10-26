@@ -69,6 +69,7 @@ Search for **H-LR-1**, or choose **Gold only** in the product filter. Enquiry, l
 - **One conversation across voice and chat.** Typed messages, spoken turns and on-screen actions share the same policy engine and saved session.
 - **A name before an account.** Record lookup, duplicate-name handling and reviewed registration keep the conversation tied to the right profile. This is synthetic profile matching, not real bank authentication.
 - **Decisions grounded in code.** Fees, eligibility, offer caps and closure transitions come from validated facts and rules. Ollama only helps classify unfamiliar wording; it cannot approve an action or invent financial terms.
+- **Room for follow-up questions.** Ask about points, dues or fees while discussing an offer. Aria answers from the same account snapshot, keeps the pending terms, and admits when details such as APR or transaction dates are missing. Uncertain model interpretations need your clarification before changing the journey.
 - **A visible finish.** Explicit confirmations, written references, saved snapshots and an audit trail make it possible to follow what happened.
 - **A useful dataset.** Search 250 synthetic profiles by name, ID or city. There are 160 card profiles, 110 with gold details and 20 in both groups. Of the card profiles, 148 are ready for a demo; the other 12 show their data/status issues.
 
@@ -91,6 +92,8 @@ For an offline walkthrough, use `npm run dev` with no keys. Card policy flows st
 
 The repo includes both deployment configurations. Vercel serves the frontend and proxies `/api/*` to Render. Render runs the HTTP API, the live WebSocket connection and SQLite on a persistent disk.
 
+The public backend is configured as `https://vaani-backend-vv52.onrender.com` in [`config/deployment.json`](config/deployment.json). Vercel builds use it automatically; an optional `BACKEND_URL` environment variable can override it. If an older override is malformed, remove or correct it and redeploy.
+
 ```mermaid
 flowchart LR
     Browser[Browser: voice and chat] --> Vercel[Vercel: static frontend + API proxy]
@@ -110,6 +113,7 @@ vaani/
 ├── public/                 Browser UI, audio playback and microphone worklet
 ├── lib/                    Policy engine, services, providers, storage and transport auth
 ├── config/
+│   ├── deployment.json     Public backend origin used by the frontend build
 │   ├── datasets/           Unchanged synthetic source CSV
 │   ├── negotiation/        Offer/closure policy and demo calendar
 │   └── policy/             Tier rules and authority limits
@@ -135,7 +139,7 @@ npm run data:validate
 npm audit --omit=dev --audit-level=high
 ```
 
-The suite covers offer budgets, firm closure intent, confirmation tokens, duplicate requests, fraud routing, consent/DND, all actionable imported customers, saved sessions, audio boundaries and the hosted access/ticket flow. GitHub Actions runs these checks and a frontend build on Node.js 22 and 24.
+The suite covers offer budgets, firm closure intent, confirmation tokens, duplicate requests, fraud routing, consent/DND, all actionable imported customers, saved sessions, audio boundaries and the hosted ticket flow. Longer dialogue tests cover topic changes, corrections, model guesses, unsupported facts and confirmation after a factual detour. GitHub Actions runs these checks and a frontend build on Node.js 22 and 24.
 
 For real provider checks, start the local server with keys and run `npm run test:live` and `node scripts/classifier-smoke.mjs`. These create synthetic sessions and consume provider quota. A microphone audition is still useful: room acoustics, device quality and network conditions affect how a conversation feels.
 

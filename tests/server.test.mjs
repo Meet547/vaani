@@ -82,6 +82,12 @@ test('intent provider failure yields a safe clarification without an offer or ac
   const x=await setup(t,{credentials:{ollama:'test-only'},providers:{classifyWithModel:async()=>{throw new Error('unavailable');}}}),s=await x.session(),c=await connect(x,s.cookie);t.after(()=>c.socket.close());
   c.send({type:'text',text:'something quite unusual',messageId:'unknown'});const r=await c.wait('session');assert.equal(r.session.offerCount,0);assert.equal(r.session.state,'ANALYSE');assert.ok(r.session.trace.some(e=>e.detail.rule==='classifier_unavailable'));
 });
+test('transport treats model intent as a clarification and skips the model during closure',async t=>{
+  let calls=0;const x=await setup(t,{credentials:{ollama:'test-only'},providers:{classifyWithModel:async()=>{calls++;return {intent:'closure_firm',reason:'unknown'};}}}),s=await x.session(),c=await connect(x,s.cookie);t.after(()=>c.socket.close());
+  c.send({type:'text',text:'this is complicated'});let r=await c.wait('session');assert.equal(r.session.state,'ANALYSE');assert.equal(r.session.closureLocked,false);assert.equal(calls,1);await c.wait('turn_done');
+  c.send({type:'text',text:'yes'});r=await c.wait('session');assert.equal(r.session.state,'CLOSURE_FLOW');assert.equal(calls,1);await c.wait('turn_done');
+  c.send({type:'text',text:'something complicated again',fallback:{intent:'accept',reason:'fee'}});r=await c.wait('session');assert.equal(r.session.state,'CLOSURE_FLOW');assert.equal(calls,1);assert.equal(x.store.db.prepare('SELECT COUNT(*) n FROM closures').get().n,0);
+});
 test('provider language confidence never turns uncertain spoken yes into a closure',async t=>{
   let event;
   const providers={speechStream:()=>({push(){},end:async()=>({audioCount:1})}),connectRecognition:callbacks=>{event=callbacks.onEvent;queueMicrotask(()=>event({event:'session.begin'}));return {readyState:1,send(){},close(){}};}};

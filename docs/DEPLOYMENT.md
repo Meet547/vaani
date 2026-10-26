@@ -38,13 +38,15 @@ Wait for the backend to become healthy, then copy its public URL. A request to `
 
 Import `Meet547/vaani` into Vercel with the repository root as **Root Directory** and **Other** as the framework preset. Keep the repository's `vercel.json` build settings. Do not override the output directory: `npm run build:frontend` emits Vercel's Build Output API in `.vercel/output`.
 
-Add just this frontend environment variable:
+This repository is configured for the existing backend in `config/deployment.json`:
 
 ```text
-BACKEND_URL=https://your-service.onrender.com
+https://vaani-backend-vv52.onrender.com
 ```
 
-Use your actual Render URL. This is a public routing destination, not a credential. **Sarvam and Ollama credentials belong only on Render.** The frontend build fails clearly when `BACKEND_URL` is missing or is not an HTTPS origin.
+Vercel can build without a `BACKEND_URL` environment variable: the build reads that checked-in public origin. To route another environment to a different backend, set `BACKEND_URL` to its exact HTTPS origin. A nonempty environment override takes precedence and is validated; an invalid override fails the build with setup instructions. If an earlier deployment has an incorrect `BACKEND_URL`, delete it to use the repository setting, or replace its value with the URL above. Select the intended Production/Preview environments and redeploy after editing it.
+
+Paste only the URL as the value: no Markdown link, surrounding quotes, `/api` path or `BACKEND_URL=` prefix. This is a public routing destination, not a credential. **Sarvam and Ollama credentials belong only on Render.**
 
 Deploy. The build copies only the browser assets and generated backup audio. It generates the `/api/*` proxy route, security headers and the exact `wss://` origin for the Content Security Policy. It does not ship the CSV, source briefs, SQLite database or backend code as static assets.
 
@@ -67,7 +69,7 @@ Repository CI and local integration tests verify the code and proxy/ticket contr
 
 ## Preview URLs and custom domains
 
-Production and preview domains are different origins. Add an exact preview origin to `FRONTEND_ORIGINS` only when you want it to access this backend, then redeploy/restart the service. There is no `*.vercel.app` wildcard. Set `BACKEND_URL` for the Vercel environments you intend to use and rebuild after changing it.
+Production and preview domains are different origins. Add an exact preview origin to `FRONTEND_ORIGINS` only when you want it to access this backend, then redeploy/restart the service. There is no `*.vercel.app` wildcard. Use a `BACKEND_URL` override when an environment needs a backend different from the repository setting, and rebuild after changing it.
 
 You can give previews a separate Render backend and dataset instead of sharing production demo sessions. This repo does not provision that additional service automatically.
 
@@ -83,7 +85,7 @@ Render's [disk documentation](https://render.com/docs/disks) explains persistenc
 
 ## When something does not connect
 
-- **Build says BACKEND_URL is missing:** set it on Vercel and redeploy; use an origin without `/api`.
+- **Build rejects BACKEND_URL:** remove the incorrect override to use `config/deployment.json`, or set its value to `https://vaani-backend-vv52.onrender.com` and redeploy. Use the URL alone, without `/api`, quotes or Markdown.
 - **Backend fails at startup:** check origins, disk/path, Node.js version and [Render logs](https://render.com/docs/troubleshooting-deploys).
 - **403 / Invalid host:** check `PUBLIC_BACKEND_URL` and Render's automatic hostname. Arbitrary forwarded hosts are not trusted.
 - **403 on a POST or WebSocket:** confirm the exact frontend origin is in `FRONTEND_ORIGINS`.

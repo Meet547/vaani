@@ -26,6 +26,4 @@ jobs:
       - run: npm test
       - run: npm run data:validate
       - run: npm run build:frontend
-        env:
-          BACKEND_URL: https://vaani-example.onrender.com
       - run: npm audit --omit=dev --audit-level=high

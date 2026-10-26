@@ -21,7 +21,9 @@ The newer closure rulebook takes precedence over the earlier prototype and origi
 
 ## Runtime boundaries
 
-The Ollama model can classify unfamiliar messages, but cannot grant a waiver, supply an amount, alter state directly, confirm identity or approve closure. Templates are bilingual and all numeric formatting is deterministic. Streaming synthesis starts only from approved application-generated text.
+The Ollama model can suggest a classification for unfamiliar messages, but cannot grant a waiver, supply an amount, alter state directly, confirm identity or approve closure. Non-question suggestions are persisted as a clarification and require the caller to confirm that interpretation. The classifier is skipped during onboarding, a pending clarification, closure and terminal states. Templates are bilingual and all numeric formatting is deterministic. Streaming synthesis starts only from application-generated text.
+
+`lib/card-questions.mjs` answers follow-up questions from the confirmed session snapshot. Account facts can be discussed during an offer without changing its terms or consuming an improvement. Missing APR, tax, billing dates, transaction ledger details and points cash value receive an explicit limitation. Another named profile requires a fresh lookup. A bare negative before an offer does not initiate closure, and a negated closure pauses an unsubmitted request. After an informational detour, a textual acceptance brings the pending offer/redemption/closure question back for review before applying it; the explicit on-screen action remains available.
 
 Identity is explicitly simulated by the server's synthetic orchestrator. Session-cookie checks protect demo-session access; they do not constitute a bank login. Financial tables are represented by validated fixture snapshots, persisted actions, closure requests, cases and audit rows, rather than a connection to a real core-banking database.
 

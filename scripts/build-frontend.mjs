@@ -1,11 +1,14 @@
-import {mkdir,copyFile,writeFile,rm} from 'node:fs/promises';
+import {mkdir,copyFile,writeFile,readFile,rm} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {resolve,join} from 'node:path';
 import {httpsOrigin,securityHeaders} from '../lib/deployment.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 export async function buildFrontend({backendUrl=process.env.BACKEND_URL,outputDirectory=join(root,'.vercel/output')}={}){
-  const backend=httpsOrigin(backendUrl,'BACKEND_URL');
+  const configured=JSON.parse(await readFile(join(root,'config/deployment.json'),'utf8'));
+  let backend;
+  try{backend=httpsOrigin(backendUrl?.trim()||configured.backendUrl,'BACKEND_URL');}
+  catch{throw new Error('Set BACKEND_URL on Vercel to the Render HTTPS origin (for example https://vaani-backend-vv52.onrender.com), without /api, quotes or Markdown. Alternatively update backendUrl in config/deployment.json.');}
   await rm(outputDirectory,{recursive:true,force:true});
   const assets=join(outputDirectory,'static');await mkdir(assets,{recursive:true});
   for(const file of ['index.html','app.js','style.css','conversation.css','mic-worklet.js'])await copyFile(join(root,'public',file),join(assets,file));
@@ -21,5 +24,6 @@ export async function buildFrontend({backendUrl=process.env.BACKEND_URL,outputDi
   return config;
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
-  await buildFrontend();console.log('Vaani frontend built in .vercel/output. API proxy and direct Render voice origin configured.');
+  try{const config=await buildFrontend();console.log(`Vaani frontend built in .vercel/output. API backend: ${new URL(config.routes[1].dest).origin}`);}
+  catch(error){console.error(`Frontend build failed: ${error.message}`);process.exitCode=1;}
 }
