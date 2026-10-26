@@ -1,0 +1,16 @@
+node_modules/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+test-results/
+data/*.sqlite*
+data/*.db*
+.runtime/
+.freebuff/
+.vercel/
+coverage/
+data/
+*.pem
+*.key

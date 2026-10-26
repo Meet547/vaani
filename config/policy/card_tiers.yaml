@@ -1,0 +1,17 @@
+restricted:
+  min_dpd90: 1
+  score_below: 650
+high:
+  spend: 300000
+  minimum_score: 720
+  spend_without_bureau: 400000
+core_spend: 120000
+light_spend: 30000
+dormant_trend_pct: -80
+max_fee_to_spend_ratio: 0.05
+limits:
+  A: {waiver: 3000, reversal: 3000, points: 2000, competitor: 3000}
+  B: {waiver: 3000, reversal: 3000, points: 1500, competitor: 3000}
+  C: {waiver: 3000, reversal: 3000, points: 1000, competitor: 0}
+  D: {waiver: 0, reversal: 0, points: 0, competitor: 0}
+  X: {waiver: 0, reversal: 0, points: 0, competitor: 0}

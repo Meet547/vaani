@@ -1,0 +1,8 @@
+.access-panel{max-width:620px;margin:0 auto 35px;padding:28px;border:1px solid var(--line);border-radius:16px;background:#fafbf4}
+.access-panel h2{font:normal 30px/1.2 var(--serif);margin:0 0 15px}
+.access-panel>p:not(.eyebrow){font-size:13px;line-height:1.8;color:#718066}
+.access-panel label{display:block;font-size:12px;margin:21px 0 9px}
+.access-panel form>div{display:flex;gap:12px}
+.access-panel input{min-width:0;flex:1;border:1px solid #d5ddc9;border-radius:7px;padding:10px;background:#fffef9;color:#385137}
+#access-error{font-size:12px;color:#914f3e;line-height:1.6}
+@media(max-width:500px){.access-panel{padding:21px}.access-panel form>div{flex-direction:column}}

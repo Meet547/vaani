@@ -1,0 +1,111 @@
+# Synthetic fixtures. These are not real customers, credit reports or accounts.
+# Specified hero figures come from the supplied rulebook; remaining fields are demo choices.
+customers:
+  - id: H-CARD-1
+    name: Riya
+    product: Gold
+    last4: '4821'
+    tenure_months: 36
+    credit_limit: 200000
+    annual_fee: 2999
+    fee_waiver_spend: 30000
+    fee_days_ago: 12
+    reward_points: 1240
+    outstanding_dues: 0
+    emi_outstanding: 0
+    status: active
+    addon_cards: 0
+    monthly_spend: [26000,26000,26000,26000,26000,26000,25000,25000,25000,8000,8000,9000]
+    mandates: [Streaming subscription, Gym membership]
+    bureau_consent: true
+    score: 745
+    dpd_30_count: 0
+    dpd_90_count: 0
+    service_ticket: false
+    fraud_ticket: false
+    prior_waiver_days_ago: null
+    relationship: true
+    outreach_consent: true
+    dnd: false
+    last_contact_days_ago: 30
+  - id: H-CARD-2
+    name: Arjun
+    product: Silver
+    last4: '6752'
+    tenure_months: 24
+    credit_limit: 100000
+    annual_fee: 1499
+    fee_waiver_spend: 30000
+    fee_days_ago: null
+    reward_points: 400
+    outstanding_dues: 0
+    emi_outstanding: 0
+    status: active
+    addon_cards: 0
+    monthly_spend: [1000,1000,1000,1000,1000,1000,1000,1000,0,0,0,0]
+    mandates: [Streaming subscription, Gym membership]
+    bureau_consent: true
+    score: 770
+    dpd_30_count: 0
+    dpd_90_count: 0
+    service_ticket: false
+    fraud_ticket: false
+    prior_waiver_days_ago: null
+    relationship: false
+    outreach_consent: false
+    dnd: true
+    last_contact_days_ago: null
+  - id: H-CARD-3
+    name: Neha
+    product: Platinum
+    last4: '9146'
+    tenure_months: 48
+    credit_limit: 400000
+    annual_fee: 2999
+    fee_waiver_spend: 50000
+    fee_days_ago: 5
+    reward_points: 2200
+    outstanding_dues: 3000
+    emi_outstanding: 0
+    status: active
+    addon_cards: 1
+    monthly_spend: [40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000,40000]
+    mandates: []
+    bureau_consent: true
+    score: 780
+    dpd_30_count: 0
+    dpd_90_count: 0
+    service_ticket: false
+    fraud_ticket: true
+    prior_waiver_days_ago: null
+    relationship: true
+    outreach_consent: true
+    dnd: false
+    last_contact_days_ago: 60
+  - id: H-CARD-4
+    name: Sameer
+    product: Silver
+    last4: '3368'
+    tenure_months: 20
+    credit_limit: 100000
+    annual_fee: 1499
+    fee_waiver_spend: 30000
+    fee_days_ago: null
+    reward_points: 0
+    outstanding_dues: 12500
+    emi_outstanding: 4000
+    status: active
+    addon_cards: 1
+    monthly_spend: [9000,9000,9000,9000,9000,9000,9000,9000,9000,9000,9000,9000]
+    mandates: [Mobile subscription]
+    bureau_consent: false
+    score: 700
+    dpd_30_count: 0
+    dpd_90_count: 0
+    service_ticket: false
+    fraud_ticket: false
+    prior_waiver_days_ago: null
+    relationship: true
+    outreach_consent: true
+    dnd: false
+    last_contact_days_ago: 30

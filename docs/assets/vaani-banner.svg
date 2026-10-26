@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">Vaani</title><desc id="desc">A little room to be heard. A thoughtful voice and chat banking sandbox.</desc>
+  <defs><radialGradient id="orb" cx="28%" cy="23%" r="80%"><stop offset="0" stop-color="#f4efca"/><stop offset=".38" stop-color="#d6e3af"/><stop offset=".72" stop-color="#98b48a"/><stop offset="1" stop-color="#527d5b"/></radialGradient></defs>
+  <rect width="1200" height="320" rx="24" fill="#f5f4ef"/>
+  <circle cx="970" cy="160" r="125" fill="none" stroke="#dfe5d5"/><circle cx="970" cy="160" r="104" fill="none" stroke="#d5dfc8"/><circle cx="970" cy="160" r="79" fill="url(#orb)"/>
+  <text x="70" y="80" font-family="Arial,sans-serif" font-size="12" letter-spacing="4" fill="#7b8b6e">A LITTLE MORE HUMAN</text>
+  <text x="64" y="174" font-family="Georgia,serif" font-size="94" fill="#304638">vaani<tspan fill="#879a70">.</tspan></text>
+  <text x="70" y="226" font-family="Georgia,serif" font-style="italic" font-size="30" fill="#778867">A little room to be heard.</text>
+  <text x="72" y="272" font-family="Arial,sans-serif" font-size="14" fill="#7a8372">VOICE + CHAT · SYNTHETIC BANKING · CLEAR POLICY CONTROLS</text>
+</svg>

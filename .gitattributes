@@ -1,0 +1,4 @@
+* text=auto eol=lf
+# Preserve the supplied dataset and reference briefs byte-for-byte.
+config/datasets/*.csv -text whitespace=cr-at-eol
+docs/source/* -text

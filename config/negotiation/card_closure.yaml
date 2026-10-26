@@ -1,0 +1,10 @@
+completion_working_days: 7
+confirmation_ttl_seconds: 180
+session_ttl_hours: 24
+reminder_working_days: 1
+weekend_days: [0, 6]
+holidays: []
+dues_are_completion_condition: true
+timezone: Asia/Kolkata
+inactive_card_queue: credit_ops
+default_review_queue: credit_ops

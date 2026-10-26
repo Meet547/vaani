@@ -1,0 +1,6 @@
+demo: "This is a synthetic customer demonstration. No real card is changed, no message is sent, and no person is connected."
+points: "In this demo policy, remaining points are forfeited when closure completes."
+bureau: "This demo does not predict credit-score changes. A bank colleague can explain the applicable reporting policy."
+cancel: "A bank colleague would need to review cancellation of a submitted closure request."
+emi: "Under this demo policy, existing EMIs continue as scheduled."
+delivery: "Your simulated confirmation is saved in this session. No SMS or email has been sent."

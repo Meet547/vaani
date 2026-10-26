@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f4ef"><title>Vaani — a conversation, naturally.</title>
+  <meta name="description" content="A voice-first synthetic banking demo. Meet Aria, explore 250 customer profiles, and try thoughtful card conversations with clear policy controls.">
+  <link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/access.css"><script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar"><a class="wordmark" href="/" aria-label="Vaani home"><span class="brand-symbol">v</span> vaani<span class="wordmark-dot">.</span></a><div class="header-right"><span class="demo-badge">VOICE LAB</span><span id="connection" class="connection"><i></i> Checking connection</span></div></header>
+  <main>
+    <section id="access-panel" class="access-panel" aria-labelledby="access-title" hidden><p class="eyebrow">WELCOME TO VAANI</p><h2 id="access-title">Your invitation to the demo.</h2><p>Enter the access code shared by the host to explore the synthetic accounts and try Aria’s voice.</p><form id="access-form"><label for="access-code">Demo access code</label><div><input id="access-code" type="password" required maxlength="256" autocomplete="off"><button id="access-submit" class="secondary-button" type="submit">Open the demo</button></div><p id="access-error" role="alert"></p></form></section>
+    <div id="app-content" hidden>
+    <section class="intro"><div><p class="eyebrow">A LITTLE MORE HUMAN</p><h1>A conversation,<br><em>naturally.</em></h1></div><p class="intro-copy">Meet Aria. A thoughtful voice that listens,<br class="desktop"> understands, and takes it one turn at a time.</p></section>
+    <section class="customer-directory" aria-label="Customer directory">
+      <div class="directory-heading"><div><p class="eyebrow">SYNTHETIC CUSTOMER DIRECTORY</p><h2>One profile. The right conversation.</h2></div><p id="dataset-summary" role="status">Loading customer dataset…</p></div>
+      <div class="directory-filters"><div><label for="customer-search">Find a customer</label><input id="customer-search" type="search" placeholder="Search name, ID or city" maxlength="100"></div><div><label for="segment-filter">Products</label><select id="segment-filter"><option value="all">All customers</option><option value="card_only">Card only</option><option value="gold_only">Gold only · read-only</option><option value="card_and_gold">Card + gold</option><option value="ready">Ready for card demo</option><option value="review">Card records needing review</option><option value="heroes">Hero scenarios</option></select></div></div>
+      <p id="customer-results" class="directory-note" role="status"></p>
+    </section>
+    <section class="demo-toolbar" aria-label="Synthetic demo setup">
+      <div class="scenario-select"><label for="customer">Synthetic customer</label><select id="customer" disabled><option value="">Loading profiles…</option></select></div>
+      <div class="scenario-select"><label for="trigger">Entry path</label><select id="trigger"><option value="customer_message">Customer conversation</option><option value="card_closure_request">Closure request</option><option value="downgrade_request">Downgrade request</option><option value="usage_drop">Usage drop · proactive</option><option value="churn_score_high">Churn signal · proactive</option></select></div>
+      <div class="session-buttons"><button id="resume" class="secondary-button" hidden>Resume saved session</button><button id="new-session" class="secondary-button">New demo session</button></div>
+      <p id="identity-note">Synthetic accounts only. Identity verification is simulated by the demo orchestrator.</p>
+    </section>
+    <section id="customer-profile" class="customer-profile" aria-label="Selected customer profile" hidden>
+      <div class="profile-heading"><div><h2 id="profile-name"></h2><p id="profile-meta"></p></div><span id="profile-status" class="state-badge"></span></div>
+      <p id="profile-description"></p><div id="profile-warnings" role="status"></div>
+      <div class="profile-grid"><div id="card-profile" hidden><h3>Card snapshot</h3><dl id="card-profile-facts"></dl></div><div id="gold-profile" hidden><h3>Gold enquiry &amp; existing loan <span>Read-only</span></h3><dl id="gold-profile-facts"></dl><p class="directory-note">Source facts only. Gold offers, rates, applications and valuation bookings are not enabled.</p></div></div>
+      <p id="profile-language" class="directory-note"></p><p id="profile-session-note" class="directory-note"></p>
+    </section>
+    <div class="workspace">
+      <section class="call-panel" aria-label="Voice call">
+        <div class="panel-top"><span class="live-tag"><i></i> LIVE CONVERSATION</span><span id="duration">00:00</span></div>
+        <div id="orb-stage" class="orb-stage" data-state="idle"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orb"><div class="orb-core"></div><div class="orb-highlight"></div></div><div class="orb-caption">A R I A</div></div>
+        <div class="call-description"><span id="state" class="state-label">READY WHEN YOU ARE</span><h2 id="call-title">Good conversations start<br>with listening.</h2><p id="call-hint">Say what’s on your mind. Aria will take it from there.</p></div>
+        <div class="waveform" id="waveform" aria-hidden="true"></div>
+        <div class="call-controls"><button id="mute" class="round-control" aria-label="Mute microphone" title="Mute microphone" disabled><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 10v2a7 7 0 0 0 14 0v-2M12 19v3M8 22h8"/></svg></button><button id="call" class="primary-button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 3H4a1 1 0 0 0-1 1c0 9.4 7.6 17 17 17a1 1 0 0 0 1-1v-3l-5-2-2 2a15 15 0 0 1-7-7l2-2-2-5Z"/></svg><span>Start conversation</span></button><button id="interrupt" class="round-control" title="Interrupt Aria" aria-label="Interrupt Aria" disabled><svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg></button></div>
+        <p class="headphone-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 14v-3a8 8 0 0 1 16 0v3M4 12H2v8h4v-8H4Zm16 0h2v8h-4v-8h2Z"/></svg> Headphones make it feel even closer.</p>
+        <div id="error" class="error" role="alert" hidden></div>
+        <div class="call-footer"><span><i></i> Natural turn-taking</span><span>Interrupt anytime</span><span>English + हिन्दी</span></div>
+      </section>
+      <aside class="right-column">
+        <section class="transcript-panel"><div class="section-heading"><h2>The conversation</h2><button id="clear" class="text-button" title="Disconnect and clear this view; the session stays saved">Clear view</button></div><div id="transcript" class="transcript" role="log" aria-live="polite"><div id="empty" class="empty-transcript"><span class="quote-mark">“</span><h3>A little space for your words.</h3><p>Voice and chat share the same policy controls.<br>Demo sessions are saved locally so you can resume.</p></div></div><div id="partial" class="partial" aria-live="off"></div><form id="text-form"><label class="sr-only" for="message">Type a message to Aria</label><input id="message" autocomplete="off" placeholder="Or type something to Aria…" maxlength="2000"><button type="submit" id="send" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m5 12 7-7 7 7M12 5v15"/></svg></button></form></section>
+        <section id="decision-panel" class="decision-panel" hidden aria-live="polite"><div class="section-heading"><h2 id="decision-title">Next step</h2><span id="state-badge" class="state-badge"></span></div><div id="decision-facts"></div><div id="quick-actions" class="quick-actions"></div></section>
+        <section class="settings-panel"><div class="section-heading"><h2>Make it your conversation</h2><span class="small-star">✳</span></div><div class="setting"><label for="voice">Aria’s voice</label><select id="voice"><option value="warm">Simran · warm & conversational</option><option value="expressive">Ishita · expressive & attentive</option><option value="calm">Shalini · calm & reassuring</option></select></div><div class="settings-row"><div class="setting"><label for="language">Start in</label><select id="language"><option value="auto">English / Hinglish</option><option value="hi-IN">हिन्दी</option><option value="en-IN">English</option></select></div><div class="setting pace-setting"><label for="pace">Speaking pace <output id="pace-value">1.00×</output></label><input id="pace" type="range" min="0.85" max="1.15" step="0.05" value="1"></div></div><p id="settings-note">A warm voice. A natural pace. Room to pause.</p></section>
+      </aside>
+    </div>
+    <section id="inspector" class="inspector" hidden><details><summary>Behind the decision <span id="policy-label"></span></summary><div class="inspector-grid"><div><h3>Session &amp; policy</h3><pre id="policy-state"></pre><h3>Simulated handoff queue</h3><div id="handoff-list"></div><h3>Deadline alerts</h3><div id="deadline-list">No alerts.</div></div><div><h3>Audit trail <span id="audit-status"></span></h3><div id="audit-list"></div></div></div></details></section>
+    <footer><span><b>HARDENED DEMO.</b> Synthetic BombayBank accounts · no real banking actions.</span><span id="latency">Designed to listen.</span></footer>
+    <details class="technical"><summary>Behind the voice &amp; data</summary><p id="models">Connecting to the voice services…</p><p>Demo sessions, masked transcripts and audit records are stored locally in SQLite. Audio is not recorded. Audio is sent to Sarvam; ambiguous masked messages may be sent to Ollama for intent classification. Provider retention policies apply.</p><p>Pre-recorded synthetic demo excerpt · works without the provider APIs:</p><audio id="backup-player" controls preload="none" src="/demo-backup.wav">Use a browser with audio playback support.</audio></details>
+    </div>
+  </main>
+</body>
+</html>

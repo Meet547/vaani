@@ -1,0 +1,35 @@
+mode: demo
+bank_name: BombayBank
+policy_version: demo-2026-10-25
+approved_for_live_use: false
+max_offers: 1
+max_improvements: 1
+max_reason_questions: 1
+waiver_cap: 3000
+points_cap: 2000
+points_months: 3
+points_initial_fraction: 0.5
+waiver_months: 12
+reversal_days: 30
+repeat_waiver_months: 12
+competitor_min_tenure_months: 12
+review_working_days: 1
+human_level_one_cap: 6000
+max_voice_reconfirmations: 1
+voice_confirmation_threshold: 0.7
+contact_cooldown_days: 7
+closure_continues_during_review: true
+ranking:
+  fit_weight: 100
+  acceptance_weight: 20
+  relationship_weight: 5
+  cost_weight: 0.001
+  acceptance_probability: 0.5
+never_say:
+  - this offer ends today
+  - last chance
+  - you cannot close
+  - you must pay first before we close
+  - guaranteed
+  - you'll regret
+  - i know what the other bank offered

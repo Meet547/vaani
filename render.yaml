@@ -1,0 +1,32 @@
+# One instance: SQLite and short-lived voice tickets belong to this service.
+# A persistent disk requires a paid Render service. Review the plan before creating it.
+services:
+  - type: web
+    name: vaani-api
+    runtime: node
+    plan: starter
+    numInstances: 1
+    buildCommand: npm ci --omit=dev && npm run check
+    startCommand: npm start
+    healthCheckPath: /api/health
+    disk:
+      name: vaani-data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: 24
+      - key: DEPLOYMENT_TARGET
+        value: render
+      - key: DATABASE_PATH
+        value: /var/data/vaani/aria.sqlite
+      - key: FRONTEND_ORIGINS
+        sync: false
+      - key: DEMO_ACCESS_CODE
+        generateValue: true
+      - key: SARVAM_API_KEY
+        sync: false
+      - key: OLLAMA_API_KEY
+        sync: false
