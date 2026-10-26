@@ -16,7 +16,7 @@ Search by name, ID or city, and filter by product, hero scenario, card readiness
 
 ## Mapping and policy boundaries
 
-`lib/customer-data.mjs` validates and maps the source into two separate structures: a browsable profile directory and validated card-engine customers. The server supplies a lightweight directory through `/api/config` and an allowlisted profile through `/api/customers/:id`. The raw CSV is not served as a public file.
+`src/customer-data.mjs` validates and maps the source into two separate structures: a browsable profile directory and validated card-engine customers. The server supplies a lightweight directory through `/api/config` and an allowlisted profile through `/api/customers/:id`. The raw CSV is not served as a public file.
 
 | Source | Use |
 | --- | --- |

@@ -2,9 +2,9 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {once} from 'node:events';
 import WebSocket from 'ws';
-import {createApplication} from '../server.mjs';
-import {Store} from '../lib/store.mjs';
-import {loadPolicy} from '../lib/policy.mjs';
+import {createApplication} from '../src/server.mjs';
+import {Store} from '../src/store.mjs';
+import {loadPolicy} from '../src/policy.mjs';
 
 async function setup(t,overrides={}){
   const app=createApplication({store:new Store(':memory:'),policy:loadPolicy({customerSource:'fixtures'}),...overrides});
@@ -36,6 +36,13 @@ async function connect(x,cookie,textOnly=true){
   socket.send(JSON.stringify({type:'start',textOnly}));await wait('ready');
   return {socket,wait,send:message=>socket.send(JSON.stringify(message))};
 }
+test('the server resolves frontend assets and backup audio from the project root',async t=>{
+  const x=await setup(t);
+  for(const [path,type] of [['/','text/html'],['/app.js','text/javascript'],['/style.css','text/css'],['/conversation.css','text/css'],['/mic-worklet.js','text/javascript'],['/demo-backup.wav','audio/wav']]){
+    const response=await fetch(x.origin+path);assert.equal(response.status,200,path);assert.ok(response.headers.get('content-type').startsWith(type),path);const data=Buffer.from(await response.arrayBuffer());assert.ok(data.length>0,path);
+    if(path.endsWith('.wav'))assert.equal(data.toString('ascii',0,4),'RIFF');
+  }
+});
 test('HTTP authentication, origin, static path and secret boundaries',async t=>{
   const x=await setup(t);
   assert.equal((await fetch(x.origin+'/api/health')).status,200);

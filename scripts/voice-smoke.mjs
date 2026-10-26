@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 import assert from 'node:assert/strict';
 import WebSocket from 'ws';
-import { WavStream } from '../lib/audio.mjs';
+import { WavStream } from '../src/audio.mjs';
 
 // Supply a synthetic, mono 16 kHz PCM WAV fixture, never a private recording.
 const fixture = process.argv[2];

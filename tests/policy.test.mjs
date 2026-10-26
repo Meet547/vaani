@@ -1,7 +1,7 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {loadPolicy,validatePolicy,metrics,assignTier,retentionOptions,businessDeadline} from '../lib/policy.mjs';
-import {words} from '../lib/words.mjs';
+import {loadPolicy,validatePolicy,metrics,assignTier,retentionOptions,businessDeadline} from '../src/policy.mjs';
+import {words} from '../src/words.mjs';
 const p=loadPolicy({customerSource:'fixtures'});
 test('the documented heroes produce exactly B, D, X and C with the expected spend',()=>{
   assert.deepEqual(p.customers.map(c=>assignTier(c,metrics(c,p),p)),['B','D','X','C']);

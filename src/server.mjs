@@ -6,25 +6,25 @@ import { resolve } from 'node:path';
 import readline from 'node:readline';
 import { parse } from 'yaml';
 import { WebSocketServer, WebSocket } from 'ws';
-import { settings, takeSentences, cleanSpeech, voices } from './lib/conversation.mjs';
-import { speechStream, connectRecognition, classifyWithModel } from './lib/providers.mjs';
-import { loadPolicy, metrics, assignTier } from './lib/policy.mjs';
-import { customerIndex } from './lib/customer-data.mjs';
-import { Store } from './lib/store.mjs';
-import { CardEngine } from './lib/engine.mjs';
-import { classify } from './lib/intents.mjs';
-import {canUseModel,classifierContext} from './lib/dialogue.mjs';
-import { redact } from './lib/privacy.mjs';
-import { loadDeployment, securityHeaders } from './lib/deployment.mjs';
-import { VoiceTickets, readCookie, cookieValue } from './lib/transport-auth.mjs';
+import { settings, takeSentences, cleanSpeech, voices } from './conversation.mjs';
+import { speechStream, connectRecognition, classifyWithModel } from './providers.mjs';
+import { loadPolicy, metrics, assignTier } from './policy.mjs';
+import { customerIndex } from './customer-data.mjs';
+import { Store } from './store.mjs';
+import { CardEngine } from './engine.mjs';
+import { classify } from './intents.mjs';
+import {canUseModel,classifierContext} from './dialogue.mjs';
+import { redact } from './privacy.mjs';
+import { loadDeployment, securityHeaders } from './deployment.mjs';
+import { VoiceTickets, readCookie, cookieValue } from './transport-auth.mjs';
 
-const runtime=parse(readFileSync(new URL('./config/runtime.yaml',import.meta.url),'utf8'));
+const runtime=parse(readFileSync(new URL('../config/runtime.yaml',import.meta.url),'utf8'));
 if(runtime.host!=='127.0.0.1')throw new Error('Use DEPLOYMENT_TARGET=render for hosted binding; keep the local runtime on loopback.');
 for(const [name,value] of Object.entries(runtime))if(name!=='host'&&(!Number.isSafeInteger(value)||value<=0))throw new Error(`Invalid runtime setting: ${name}`);
 const files=new Map([['/',['index.html','text/html']],['/app.js',['app.js','text/javascript']],['/style.css',['style.css','text/css']],['/mic-worklet.js',['mic-worklet.js','text/javascript']],['/demo-backup.wav',['../artifacts/aria-backup.wav','audio/wav']]]);
 files.set('/conversation.css',['conversation.css','text/css']);
 
-export function createApplication({credentials={},deployment=loadDeployment(),store=new Store(deployment.databasePath||fileURLToPath(new URL('./data/aria.sqlite',import.meta.url))),policy=loadPolicy(),providers={speechStream,connectRecognition,classifyWithModel},model=process.env.OLLAMA_MODEL||'gemma4:31b',ttsModel=process.env.SARVAM_TTS_MODEL||'bulbul:v4-flash',sttModel=process.env.SARVAM_STT_MODEL||'saaras:v4'}={}) {
+export function createApplication({credentials={},deployment=loadDeployment(),store=new Store(deployment.databasePath||fileURLToPath(new URL('../data/aria.sqlite',import.meta.url))),policy=loadPolicy(),providers={speechStream,connectRecognition,classifyWithModel},model=process.env.OLLAMA_MODEL||'gemma4:31b',ttsModel=process.env.SARVAM_TTS_MODEL||'bulbul:v4-flash',sttModel=process.env.SARVAM_STT_MODEL||'saaras:v4'}={}) {
   const engine=new CardEngine(store,policy), voiceAvailable=Boolean(credentials.sarvam), shuttingDown={value:false};
   const tickets=new VoiceTickets();
   const sessionCookie=deployment.secure?'__Host-vaani_session':'aria_session';
@@ -60,7 +60,7 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
       if(pathname==='/api/session') {const s=store.authorize(cookie(req));return json(res,s?200:401,s?{session:engine.view(s)}:{error:'No saved session.'});}
       if(pathname==='/api/alerts') {const s=store.authorize(cookie(req));if(!s)return json(res,401,{error:'Session required.'});const alerts=engine.scanDeadlines();return json(res,200,{closures:alerts.closures.filter(a=>a.session_id===s.id),reviews:alerts.reviews.filter(a=>a.session_id===s.id)});}
       const file=files.get(pathname);if(!file)return json(res,404,{error:'Not found.'});
-      try{res.setHeader('Content-Type',file[1]);return res.end(await readFile(new URL(`./public/${file[0]}`,import.meta.url)));}catch{return json(res,500,{error:'Interface could not be loaded.'});}
+      try{res.setHeader('Content-Type',file[1]);return res.end(await readFile(new URL(`../public/${file[0]}`,import.meta.url)));}catch{return json(res,500,{error:'Interface could not be loaded.'});}
     }
     if(req.method==='POST'&&pathname==='/api/voice-ticket'){
       if(!validOrigin(req))return json(res,403,{error:'Trusted origin required.'});

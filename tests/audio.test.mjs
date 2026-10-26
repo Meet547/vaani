@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { WavStream } from '../lib/audio.mjs';
+import { WavStream } from '../src/audio.mjs';
 
 function header() {
   const b = Buffer.alloc(44);

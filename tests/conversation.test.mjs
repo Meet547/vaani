@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import { readFileSync } from 'node:fs';
-import { settings, takeSentences, cleanSpeech } from '../lib/conversation.mjs';
+import { settings, takeSentences, cleanSpeech } from '../src/conversation.mjs';
 
 test('streamed sentences preserve an incomplete thought across token chunks', () => {
   const first = takeSentences('That sounds frustrating. What would');

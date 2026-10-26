@@ -1,8 +1,8 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {CardEngine} from '../lib/engine.mjs';
-import {Store} from '../lib/store.mjs';
-import {loadPolicy} from '../lib/policy.mjs';
+import {CardEngine} from '../src/engine.mjs';
+import {Store} from '../src/store.mjs';
+import {loadPolicy} from '../src/policy.mjs';
 
 function setup(t,customerId='H-CARD-1'){
   const store=new Store(':memory:');t.after(()=>store.close());

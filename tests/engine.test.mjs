@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {Store} from '../lib/store.mjs';
-import {loadPolicy} from '../lib/policy.mjs';
-import {CardEngine} from '../lib/engine.mjs';
-import {classify} from '../lib/intents.mjs';
-import {redact} from '../lib/privacy.mjs';
+import {Store} from '../src/store.mjs';
+import {loadPolicy} from '../src/policy.mjs';
+import {CardEngine} from '../src/engine.mjs';
+import {classify} from '../src/intents.mjs';
+import {redact} from '../src/privacy.mjs';
 const policy=loadPolicy({customerSource:'fixtures'});
 function setup(t,customerId='H-CARD-1',options={}){
   const store=new Store(':memory:');t.after(()=>store.close());let now=Date.parse('2026-10-25T12:00:00Z');

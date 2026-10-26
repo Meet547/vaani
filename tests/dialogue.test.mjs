@@ -1,10 +1,10 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {CardEngine} from '../lib/engine.mjs';
-import {Store} from '../lib/store.mjs';
-import {loadPolicy} from '../lib/policy.mjs';
-import {classify} from '../lib/intents.mjs';
-import {classifierContext} from '../lib/dialogue.mjs';
+import {CardEngine} from '../src/engine.mjs';
+import {Store} from '../src/store.mjs';
+import {loadPolicy} from '../src/policy.mjs';
+import {classify} from '../src/intents.mjs';
+import {classifierContext} from '../src/dialogue.mjs';
 
 function setup(t,customerId='H-CARD-4'){
   const store=new Store(':memory:');t.after(()=>store.close());const engine=new CardEngine(store,loadPolicy()),created=engine.create({customerId});

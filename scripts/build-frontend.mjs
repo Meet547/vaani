@@ -1,7 +1,7 @@
 import {mkdir,copyFile,writeFile,readFile,rm} from 'node:fs/promises';
 import {fileURLToPath} from 'node:url';
 import {resolve,join} from 'node:path';
-import {httpsOrigin,securityHeaders} from '../lib/deployment.mjs';
+import {httpsOrigin,securityHeaders} from '../src/deployment.mjs';
 
 const root=fileURLToPath(new URL('../',import.meta.url));
 export async function buildFrontend({backendUrl=process.env.BACKEND_URL,outputDirectory=join(root,'.vercel/output')}={}){

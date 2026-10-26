@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import readline from 'node:readline';
 import {setTimeout as delay} from 'node:timers/promises';
 import WebSocket from 'ws';
-import {speechStream} from '../lib/providers.mjs';
+import {speechStream} from '../src/providers.mjs';
 
 // Synthetic speech only. Launch with terminal echo disabled and supply the
 // Sarvam key as one JSON line on stdin; credentials are never written to disk.

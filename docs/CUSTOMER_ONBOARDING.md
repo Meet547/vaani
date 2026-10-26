@@ -14,7 +14,7 @@ If no match exists, the assistant asks whether to create a synthetic profile. It
 
 The `customer_profiles` table stores new profiles independently from the CSV. IDs use the `NEW-...` prefix. Repeated submission is idempotent; a profile with the same normalized name/city is reused rather than overwriting its enquiry. A saved profile is searchable after refresh and server restart. It contains no artificial fee, balance, credit score, tenure, card product or eligibility. Linking a validated account is a separate integration step.
 
-`lib/customer-journey.mjs` owns the onboarding states; `lib/engine.mjs` keeps the financial policy transitions. The model classifier is skipped during identity, registration and saved-context review. Neither source `EXP_*` labels nor source response/confirmation fields become live instructions. Name introductions that already include a current closure request preserve that request until identification is complete.
+`src/customer-journey.mjs` owns the onboarding states; `src/engine.mjs` keeps the financial policy transitions. The model classifier is skipped during identity, registration and saved-context review. Neither source `EXP_*` labels nor source response/confirmation fields become live instructions. Name introductions that already include a current closure request preserve that request until identification is complete.
 
 SQLite schema version 2 adds the profiles table with `CREATE TABLE IF NOT EXISTS`. Existing sessions, confirmations and audit chains are preserved. Onboarding drafts live in their saved session, so a partially completed registration can resume too. The audit records profile creation and the source of a matched identity.
 

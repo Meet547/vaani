@@ -22,7 +22,7 @@ try {
   const sarvam = process.env.SARVAM_API_KEY || await hiddenInput('Sarvam API key (hidden)');
   const ollama = process.env.OLLAMA_API_KEY || await hiddenInput('Ollama API key (hidden)');
   if (!sarvam || !ollama) throw new Error('Both keys are required.');
-  const child = spawn(process.execPath, ['server.mjs'], { stdio: 'inherit', env: { ...process.env, SARVAM_API_KEY: sarvam, OLLAMA_API_KEY: ollama } });
+  const child = spawn(process.execPath, ['src/server.mjs'], { stdio: 'inherit', env: { ...process.env, SARVAM_API_KEY: sarvam, OLLAMA_API_KEY: ollama } });
   child.on('exit', code => process.exit(code ?? 0));
   child.on('error', () => { console.error('Could not start the voice server.'); process.exit(1); });
 } catch (error) { console.error(error.message); process.exitCode = 1; }

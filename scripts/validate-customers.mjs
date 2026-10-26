@@ -1,6 +1,6 @@
 import {readFileSync} from 'node:fs';
-import {parseCsv,loadCustomerData,datasetPath} from '../lib/customer-data.mjs';
-import {loadPolicy,metrics,assignTier,validatePolicy} from '../lib/policy.mjs';
+import {parseCsv,loadCustomerData,datasetPath} from '../src/customer-data.mjs';
+import {loadPolicy,metrics,assignTier,validatePolicy} from '../src/policy.mjs';
 
 // Optional input is inspected, not copied or activated. No expected value changes policy.
 const csv=readFileSync(process.argv[2]||datasetPath,'utf8');

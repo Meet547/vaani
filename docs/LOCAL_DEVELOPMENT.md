@@ -15,21 +15,21 @@ Use this HTTP address in your browser. Opening `public/index.html` directly as a
 | `docs/source/card_closure_rulebook.md` | Unchanged copy of your rulebook |
 | `docs/source/card_retention_agent_voice_chat.md` | Unchanged copy of your chat/voice specification |
 | `docs/source/aria-original-prompt.txt` | Original Aria personality brief, preserved for reference |
-| `config/negotiation/card.yaml` | Offer budgets, caps, review targets, prohibited phrases and voice-confirmation threshold |
-| `config/policy/card_tiers.yaml` | Tier thresholds and per-tier caps |
-| `config/negotiation/card_closure.yaml` | Demo business calendar, deadlines and confirmation expiry |
+| `config/card.yaml` | Offer budgets, caps, review targets, prohibited phrases and voice-confirmation threshold |
+| `config/card_tiers.yaml` | Tier thresholds and per-tier caps |
+| `config/card_closure.yaml` | Demo business calendar, deadlines and confirmation expiry |
 | `config/datasets/bombaybank_card_gold_synthetic_250.csv` | Active, unchanged copy of the 250-profile synthetic dataset |
-| `lib/customer-data.mjs` | Validated CSV import, profile directory and card fact mapping |
+| `src/customer-data.mjs` | Validated CSV import, profile directory and card fact mapping |
 | `config/customers.yaml` | Original four fixtures, retained for explicit regression tests only |
-| `services/card/disclosures.yaml` | Demo disclosures and cancellation/reporting wording |
+| `config/disclosures.yaml` | Demo disclosures and cancellation/reporting wording |
 | `config/runtime.yaml` | Local transport limits, timeouts and deadline scan interval |
-| `lib/engine.mjs` | Conversation state machine and approved English/Hindi response templates |
-| `lib/card-services.mjs` | Whitelisted simulated services, confirmation checks and transactional actions |
-| `lib/intents.mjs` | Deterministic intent and counter classification |
-| `lib/policy.mjs` | Configuration validation, metrics, tiers, offer gates and business-day calculation |
-| `lib/store.mjs` | SQLite schema, transactions, session access and audit hash chain |
-| `lib/providers.mjs` | Ollama intent fallback and Sarvam speech integrations |
-| `server.mjs` | HTTP/WebSocket transport, origin checks, rate limits and shutdown |
+| `src/engine.mjs` | Conversation state machine and approved English/Hindi response templates |
+| `src/card-services.mjs` | Whitelisted simulated services, confirmation checks and transactional actions |
+| `src/intents.mjs` | Deterministic intent and counter classification |
+| `src/policy.mjs` | Configuration validation, metrics, tiers, offer gates and business-day calculation |
+| `src/store.mjs` | SQLite schema, transactions, session access and audit hash chain |
+| `src/providers.mjs` | Ollama intent fallback and Sarvam speech integrations |
+| `src/server.mjs` | HTTP/WebSocket transport, origin checks, rate limits and shutdown |
 | `public/` | Browser interface, PCM playback and microphone worklet |
 | `data/aria.sqlite` | Runtime SQLite database; excluded from Git |
 | `artifacts/aria-backup.wav` | Thirty-second, generated synthetic voice excerpt |

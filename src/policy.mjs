@@ -6,8 +6,8 @@ const root = new URL('../', import.meta.url);
 export function loadPolicy({customerSource='csv'}={}) {
   const read = path => parse(readFileSync(new URL(path, root), 'utf8'), { uniqueKeys: true, maxAliasCount: 0 });
   const policy = {
-    card: read('config/negotiation/card.yaml'), tiers: read('config/policy/card_tiers.yaml'),
-    closure: read('config/negotiation/card_closure.yaml'), disclosures: read('services/card/disclosures.yaml'),
+    card: read('config/card.yaml'), tiers: read('config/card_tiers.yaml'),
+    closure: read('config/card_closure.yaml'), disclosures: read('config/disclosures.yaml'),
     customers: read('config/customers.yaml').customers,
   };
   if(customerSource==='csv'){

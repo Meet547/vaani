@@ -3,10 +3,10 @@ import assert from 'node:assert/strict';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
-import {Store} from '../lib/store.mjs';
-import {loadPolicy} from '../lib/policy.mjs';
-import {CardEngine} from '../lib/engine.mjs';
-import {extractName} from '../lib/customer-journey.mjs';
+import {Store} from '../src/store.mjs';
+import {loadPolicy} from '../src/policy.mjs';
+import {CardEngine} from '../src/engine.mjs';
+import {extractName} from '../src/customer-journey.mjs';
 const policy=loadPolicy();
 function setup(t){const store=new Store(':memory:');t.after(()=>store.close());const engine=new CardEngine(store,policy),created=engine.create();return {engine,store,id:created.session.id,created,send:(text,extra={})=>engine.handle(created.session.id,{text,...extra})};}
 

@@ -111,25 +111,23 @@ flowchart LR
 
 ```text
 vaani/
-├── public/                 Browser UI, audio playback and microphone worklet
-├── lib/                    Policy engine, services, providers, storage and transport auth
-├── config/
-│   ├── deployment.json     Public backend origin used by the frontend build
-│   ├── datasets/           Unchanged synthetic source CSV
-│   ├── negotiation/        Offer/closure policy and demo calendar
-│   └── policy/             Tier rules and authority limits
-├── services/card/          Reviewed demo disclosures
-├── scripts/                Local startup, frontend build, data checks and live probes
-├── tests/                  Policy, data, persistence, audio and deployment tests
-├── docs/                   Deployment guide, design decisions and source briefs
-├── artifacts/              Generated backup audio and demo evidence
-├── .github/workflows/      Verification on pushes and pull requests
-├── server.mjs              HTTP/WebSocket entry point
-├── render.yaml             Backend service and persistent disk
-└── vercel.json             Frontend build entry point
+├── src/                    Backend: server, conversation logic, services and storage
+│   └── server.mjs          Start reading here for the HTTP and voice APIs
+├── public/                 Frontend: HTML, CSS, chat and browser audio
+├── config/                 Policy, disclosures, runtime settings and datasets/
+├── tests/                  Automated checks
+├── scripts/                Development, builds, data validation and live probes
+├── docs/                   Guides, design decisions and original reference briefs
+├── artifacts/              Synthetic backup audio and demo screenshots
+├── .github/workflows/      CI on branches and pull requests
+├── package.json            All start, build and test commands
+├── render.yaml             Optional Render blueprint
+└── vercel.json             Optional Vercel frontend build
 ```
 
-Runtime databases, local environment files, installed dependencies and generated Vercel output are excluded from Git. `config/customers.yaml` holds the original four regression fixtures; the CSV is the default customer source.
+Backend code stays in one `src/` directory. Policy YAML files sit directly in `config/`: `card.yaml`, `card_closure.yaml`, `card_tiers.yaml` and `disclosures.yaml`. Follow `server.mjs` → `customer-journey.mjs` → `engine.mjs` for a normal conversation; `dialogue.mjs` interprets replies to the current question and `card-services.mjs` applies the simulated actions.
+
+Run commands from the repository root: `npm start` launches `src/server.mjs`, and `npm run dev:secure` starts the same server with hidden provider-key prompts. Runtime databases live in `data/` and are excluded from Git, along with local environment files, installed dependencies and generated Vercel output. `config/customers.yaml` holds the original four regression fixtures; the unchanged CSV in `config/datasets/` is the default customer source.
 
 ## Check before shipping
 

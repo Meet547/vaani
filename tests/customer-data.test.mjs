@@ -1,10 +1,10 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {loadCustomerData,parseCsv,datasetPath} from '../lib/customer-data.mjs';
-import {loadPolicy,metrics,assignTier,retentionOptions} from '../lib/policy.mjs';
-import {CardEngine} from '../lib/engine.mjs';
-import {Store} from '../lib/store.mjs';
+import {loadCustomerData,parseCsv,datasetPath} from '../src/customer-data.mjs';
+import {loadPolicy,metrics,assignTier,retentionOptions} from '../src/policy.mjs';
+import {CardEngine} from '../src/engine.mjs';
+import {Store} from '../src/store.mjs';
 const csv=readFileSync(datasetPath,'utf8'),p=loadPolicy();
 
 test('CSV parser preserves quoted commas, newlines, BOM and escaped quotes; rejects malformed input',()=>{

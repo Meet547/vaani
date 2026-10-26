@@ -1,6 +1,6 @@
 # Keeping the conversation on the right step
 
-Aria interprets replies against a pending question: accepting an offer, redeeming points, confirming closure, or choosing between lost-card help and permanent account closure. `lib/dialogue.mjs` owns that interpretation; account services still authorize every simulated change.
+Aria interprets replies against a pending question: accepting an offer, redeeming points, confirming closure, or choosing between lost-card help and permanent account closure. `src/dialogue.mjs` owns that interpretation; account services still authorize every simulated change.
 
 For example, after the points prompt, “haa kardo fir redeem” redeems the remaining demo points and moves to the separate closure confirmation. It cannot confirm account closure. A repeat of that redemption request reports the completed redemption without doing it twice. Hindi, Hinglish and English variants share the same transition. A question such as “mere kitne points hai” reads the balance and leaves the pending choice intact.
 

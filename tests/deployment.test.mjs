@@ -6,11 +6,11 @@ import {join} from 'node:path';
 import {tmpdir} from 'node:os';
 import {request as httpRequest} from 'node:http';
 import WebSocket from 'ws';
-import {loadDeployment,httpsOrigin} from '../lib/deployment.mjs';
-import {VoiceTickets} from '../lib/transport-auth.mjs';
+import {loadDeployment,httpsOrigin} from '../src/deployment.mjs';
+import {VoiceTickets} from '../src/transport-auth.mjs';
 import {buildFrontend} from '../scripts/build-frontend.mjs';
-import {createApplication} from '../server.mjs';
-import {Store} from '../lib/store.mjs';
+import {createApplication} from '../src/server.mjs';
+import {Store} from '../src/store.mjs';
 
 const env={DEPLOYMENT_TARGET:'render',PUBLIC_BACKEND_URL:'https://vaani-api.example',FRONTEND_ORIGINS:'https://vaani.example',DATABASE_PATH:'/var/data/vaani/aria.sqlite'};
 test('hosted deployment requires explicit origins and an absolute database path',()=>{
