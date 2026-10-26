@@ -358,10 +358,6 @@ function refreshDirectory(){
   return directoryRefresh;
 }
 async function initializeApp(){try {
-  const accessResponse=await fetch('/api/access');if(!accessResponse.ok)throw new Error();
-  const access=await accessResponse.json();
-  if(!access.unlocked){$('access-panel').hidden=false;$('app-content').hidden=true;$('connection').textContent='Demo access required';return;}
-  $('access-panel').hidden=true;$('app-content').hidden=false;
   const response = await fetch('/api/config'); if (!response.ok) throw new Error();
   const info = await response.json(); voiceAvailable = info.voiceAvailable; configured = true;
   customerCatalog=info.customers;filterCustomers();
@@ -374,13 +370,4 @@ async function initializeApp(){try {
   const previous=await fetch('/api/session');if(previous.ok){savedSession=(await previous.json()).session;$('resume').hidden=false;}
 } catch { showError('Could not reach the server. Please refresh or check the deployment connection.'); $('connection').textContent = 'Server unavailable'; }
 finally{updateControls();}}
-$('access-form').addEventListener('submit',async event=>{
-  event.preventDefault();$('access-submit').disabled=true;$('access-error').textContent='';
-  try{
-    const response=await fetch('/api/access',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:$('access-code').value})});
-    const result=await response.json();if(!response.ok)throw new Error(result.error||'Could not unlock the demo.');
-    $('access-code').value='';await initializeApp();
-  }catch(error){$('access-error').textContent=error.message;}
-  finally{$('access-submit').disabled=false;}
-});
 await initializeApp();

@@ -101,7 +101,7 @@ flowchart LR
     Render --> Ollama[Ollama: intent fallback]
 ```
 
-**Start with [the deployment guide](docs/DEPLOYMENT.md).** It covers the two URLs, exact environment variables, access code, persistent disk, preview domains and the final hosted smoke check. The Render blueprint selects a paid Starter service with a 1 GB disk; review that choice before creating resources. This repository upload does not create either hosted service.
+**Start with [the deployment guide](docs/DEPLOYMENT.md).** It covers the two URLs, exact environment variables, persistent disk, preview domains and the final hosted smoke check. The Render blueprint selects a paid Starter service with a 1 GB disk; review that choice before creating resources. This repository upload does not create either hosted service.
 
 ## Find your way around
 
@@ -141,7 +141,7 @@ For real provider checks, start the local server with keys and run `npm run test
 
 ## A few honest boundaries
 
-This is a hardened demo prepared for hosting, with simulated banking services. It has no real bank authentication, account mutation, bureau pull, SMS delivery or live human transfer. The hosted access code protects a shared demo; it is not customer identity verification.
+This is a hardened demo prepared for hosting, with simulated banking services. It has no real bank authentication, account mutation, bureau pull, SMS delivery or live human transfer. The hosted demo is publicly accessible without a login or access code; use synthetic data only and monitor provider usage. Session cookies separate demo sessions but do not verify customer identity.
 
 The source data also has a few rough edges. Ten records have conflicting EMI/dues amounts and two have non-active card statuses; they remain read-only. `C0030` has a CSV tier expectation that differs from the documented first-match policy. Both the issue list and the reasoning are in [CSV integration notes](docs/CSV_INTEGRATION.md).
 

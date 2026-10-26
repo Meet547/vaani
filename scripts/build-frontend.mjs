@@ -8,7 +8,7 @@ export async function buildFrontend({backendUrl=process.env.BACKEND_URL,outputDi
   const backend=httpsOrigin(backendUrl,'BACKEND_URL');
   await rm(outputDirectory,{recursive:true,force:true});
   const assets=join(outputDirectory,'static');await mkdir(assets,{recursive:true});
-  for(const file of ['index.html','app.js','style.css','access.css','mic-worklet.js'])await copyFile(join(root,'public',file),join(assets,file));
+  for(const file of ['index.html','app.js','style.css','conversation.css','mic-worklet.js'])await copyFile(join(root,'public',file),join(assets,file));
   await copyFile(join(root,'artifacts/aria-backup.wav'),join(assets,'demo-backup.wav'));
   const config={version:3,routes:[
     {src:'/(.*)',headers:{...securityHeaders(backend),'Cache-Control':'no-store','Strict-Transport-Security':'max-age=31536000'},continue:true},

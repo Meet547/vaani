@@ -15,19 +15,19 @@ import { CardEngine } from './lib/engine.mjs';
 import { classify } from './lib/intents.mjs';
 import { redact } from './lib/privacy.mjs';
 import { loadDeployment, securityHeaders } from './lib/deployment.mjs';
-import { DemoAccess, VoiceTickets, readCookie, cookieValue } from './lib/transport-auth.mjs';
+import { VoiceTickets, readCookie, cookieValue } from './lib/transport-auth.mjs';
 
 const runtime=parse(readFileSync(new URL('./config/runtime.yaml',import.meta.url),'utf8'));
 if(runtime.host!=='127.0.0.1')throw new Error('Use DEPLOYMENT_TARGET=render for hosted binding; keep the local runtime on loopback.');
 for(const [name,value] of Object.entries(runtime))if(name!=='host'&&(!Number.isSafeInteger(value)||value<=0))throw new Error(`Invalid runtime setting: ${name}`);
 const files=new Map([['/',['index.html','text/html']],['/app.js',['app.js','text/javascript']],['/style.css',['style.css','text/css']],['/mic-worklet.js',['mic-worklet.js','text/javascript']],['/demo-backup.wav',['../artifacts/aria-backup.wav','audio/wav']]]);
-files.set('/access.css',['access.css','text/css']);
+files.set('/conversation.css',['conversation.css','text/css']);
 
 export function createApplication({credentials={},deployment=loadDeployment(),store=new Store(deployment.databasePath||fileURLToPath(new URL('./data/aria.sqlite',import.meta.url))),policy=loadPolicy(),providers={speechStream,connectRecognition,classifyWithModel},model=process.env.OLLAMA_MODEL||'gemma4:31b',ttsModel=process.env.SARVAM_TTS_MODEL||'bulbul:v4-flash',sttModel=process.env.SARVAM_STT_MODEL||'saaras:v4'}={}) {
   const engine=new CardEngine(store,policy), voiceAvailable=Boolean(credentials.sarvam), shuttingDown={value:false};
-  const accessGate=new DemoAccess(deployment.accessCode),tickets=new VoiceTickets();
-  const sessionCookie=deployment.secure?'__Host-vaani_session':'aria_session',gateCookie=deployment.secure?'__Host-vaani_demo':'vaani_demo';
-  const cookie=req=>readCookie(req,sessionCookie),hasAccess=req=>accessGate.valid(readCookie(req,gateCookie));
+  const tickets=new VoiceTickets();
+  const sessionCookie=deployment.secure?'__Host-vaani_session':'aria_session';
+  const cookie=req=>readCookie(req,sessionCookie);
   engine.scanDeadlines();
   const deadlineScanner=setInterval(()=>{try{engine.scanDeadlines();}catch{console.error('Demo deadline scan failed; inspect database integrity.');}},runtime.deadline_scan_ms);deadlineScanner.unref();
   const controlRates=new Map();
@@ -45,19 +45,6 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
     if(!validHost(req))return json(res,403,{error:'Invalid host.'});
     if(shuttingDown.value)return json(res,503,{error:'Server is shutting down.'});
     const pathname=req.url?.split('?')[0];
-    if(pathname==='/api/access'){
-      if(req.method==='GET')return json(res,200,{required:accessGate.required(),unlocked:hasAccess(req)});
-      if(req.method!=='POST')return json(res,405,{error:'Method not allowed.'});
-      if(!validOrigin(req)||req.headers['content-type']?.split(';')[0]!=='application/json')return json(res,403,{error:'Trusted-origin JSON request required.'});
-      if(!allowedRate(req,'access',30,900000))return json(res,429,{error:'Too many access attempts. Try again in 15 minutes.'});
-      try{
-        let body='';for await(const chunk of req){body+=chunk;if(Buffer.byteLength(body)>1024)return json(res,413,{error:'Request too large.'});}
-        if(!accessGate.required())return json(res,200,{unlocked:true});
-        if(!accessGate.matches(JSON.parse(body).code))return json(res,401,{error:'That access code did not match.'});
-        res.setHeader('Set-Cookie',cookieValue(gateCookie,accessGate.issue(),{secure:deployment.secure}));return json(res,200,{unlocked:true});
-      }catch{return json(res,400,{error:'Invalid access request.'});}
-    }
-    if(pathname?.startsWith('/api/')&&pathname!=='/api/health'&&!hasAccess(req))return json(res,401,{error:'Demo access code required.',accessRequired:true});
     if(req.method==='GET') {
       if(pathname==='/api/health'){
         try{store.db.prepare('SELECT 1').get();return json(res,200,{status:'ready',mode:'demo',voiceConfigured:voiceAvailable,dialogueConfigured:Boolean(credentials.ollama)});}catch{return json(res,503,{status:'unavailable'});}
@@ -98,7 +85,7 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
     if(shuttingDown.value||!validHost(req)||!validOrigin(req)||req.url!=='/voice'||wss.clients.size>=runtime.max_connections){socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');return socket.destroy();}
     const protocols=(req.headers['sec-websocket-protocol']||'').split(',').map(p=>p.trim());
     const token=protocols.find(p=>p.startsWith('ticket.'))?.slice(7);
-    const access=token?tickets.consume(token,req.headers.origin):(!deployment.secure&&hasAccess(req)?cookie(req):null);
+    const access=token?tickets.consume(token,req.headers.origin):(!deployment.secure?cookie(req):null);
     const session=store.authorize(access);
     if(!session||(token&&!protocols.includes('vaani'))){socket.write('HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\n');return socket.destroy();}
     wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws,session.id,access));
