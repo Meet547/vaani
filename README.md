@@ -70,6 +70,7 @@ Search for **H-LR-1**, or choose **Gold only** in the product filter. Enquiry, l
 - **A name before an account.** Record lookup, duplicate-name handling and reviewed registration keep the conversation tied to the right profile. This is synthetic profile matching, not real bank authentication.
 - **Decisions grounded in code.** Fees, eligibility, offer caps and closure transitions come from validated facts and rules. Ollama only helps classify unfamiliar wording; it cannot approve an action or invent financial terms.
 - **Room for follow-up questions.** Ask about points, dues or fees while discussing an offer. Aria answers from the same account snapshot, keeps the pending terms, and admits when details such as APR or transaction dates are missing. Uncertain model interpretations need your clarification before changing the journey.
+- **Replies that belong to the current question.** “Haa kardo fir redeem” redeems points during the points step and moves to a separate closure confirmation. A lost-card report pauses retention to distinguish blocking help from permanent account closure. [Conversation logic](docs/CONVERSATION_LOGIC.md) explains the flow and its limits.
 - **A visible finish.** Explicit confirmations, written references, saved snapshots and an audit trail make it possible to follow what happened.
 - **A useful dataset.** Search 250 synthetic profiles by name, ID or city. There are 160 card profiles, 110 with gold details and 20 in both groups. Of the card profiles, 148 are ready for a demo; the other 12 show their data/status issues.
 

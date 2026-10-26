@@ -114,3 +114,18 @@ test('normal conversation saves reviewed synthetic profiles and exposes them in 
   const config=await fetch(x.origin+'/api/config').then(r=>r.json());assert.equal(config.savedProfiles,1);assert.equal(config.customers.length,251);
   const profile=await fetch(x.origin+'/api/customers/'+latest.customer.id).then(r=>r.json());assert.equal(profile.name,'Kavya DemoPerson');assert.equal(profile.card,null);assert.equal(profile.canStartCard,false);
 });
+test('recognized spoken Hinglish redeems only points and preserves final voice confirmation gates',async t=>{
+  let recognition,modelCalls=0;
+  const providers={speechStream:()=>({push(){},end:async()=>({audioCount:1})}),classifyWithModel:async()=>{modelCalls++;throw new Error('Known speech should not need the model');},connectRecognition:callbacks=>{recognition=callbacks.onEvent;queueMicrotask(()=>recognition({event:'session.begin'}));return {readyState:1,send(){},close(){}};}};
+  const x=await setup(t,{policy:loadPolicy(),credentials:{sarvam:'test',ollama:'test'},providers}),s=await x.session('H-CARD-4'),c=await connect(x,s.cookie,false);t.after(()=>c.socket.close());
+  c.send({type:'text',text:'Just close my card'});assert.equal((await c.wait('session')).session.closureStep,'points');await c.wait('turn_done');
+  recognition({event:'transcript.final',text:'haa kardo fir redeem',utterance_idx:0});let r=await c.wait('session');assert.equal(r.session.checklist.points,0);assert.equal(r.session.closureStep,'confirm');assert.equal(modelCalls,0);await c.wait('turn_done');
+  recognition({event:'transcript.final',text:'haan close kar do',utterance_idx:1});r=await c.wait('session');assert.equal(r.session.state,'CLOSURE_FLOW');assert.equal(x.store.db.prepare('SELECT COUNT(*) n FROM closures').get().n,0);assert.ok(r.session.trace.some(e=>e.detail.rule==='voice_reconfirmation'));
+});
+test('the fallback model receives the pending question and must clarify an unfamiliar redemption request',async t=>{
+  let context;
+  const x=await setup(t,{policy:loadPolicy(),credentials:{ollama:'test'},providers:{classifyWithModel:async input=>{context=input.context;return {intent:'redemption_request',reason:'unknown'};}}}),s=await x.session('H-CARD-4'),c=await connect(x,s.cookie);t.after(()=>c.socket.close());
+  c.send({type:'text',text:'Just close my card'});await c.wait('session');await c.wait('turn_done');
+  c.send({type:'text',text:'use those leftover loyalty credits'});let r=await c.wait('session');assert.equal(context.pendingAction,'redeem_points');assert.equal(context.state,'CLOSURE_FLOW');assert.match(context.lastAssistant,/Redeem/);assert.equal(r.session.checklist.points,2000);await c.wait('turn_done');
+  c.send({type:'text',text:'yes'});r=await c.wait('session');assert.equal(r.session.checklist.points,0);assert.equal(r.session.closureStep,'confirm');assert.equal(x.store.db.prepare('SELECT COUNT(*) n FROM closures').get().n,0);
+});

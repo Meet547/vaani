@@ -13,6 +13,7 @@ import { customerIndex } from './lib/customer-data.mjs';
 import { Store } from './lib/store.mjs';
 import { CardEngine } from './lib/engine.mjs';
 import { classify } from './lib/intents.mjs';
+import {canUseModel,classifierContext} from './lib/dialogue.mjs';
 import { redact } from './lib/privacy.mjs';
 import { loadDeployment, securityHeaders } from './lib/deployment.mjs';
 import { VoiceTickets, readCookie, cookieValue } from './lib/transport-auth.mjs';
@@ -120,9 +121,9 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
         const s=store.authorize(access);if(!s){ws.close(1008,'Session expired.');return;}
         try{
           let fallback;
-          if(!input.action&&!s.intentClarification&&['ANALYSE','FIND_REASON','DECIDE'].includes(s.state)&&(!s.onboarding||s.onboarding.phase==='READY')&&classify(input.text,s).intent==='other'&&credentials.ollama){
+          if(!input.action&&canUseModel(s)&&classify(input.text,s).intent==='other'&&credentials.ollama){
             classifierController=new AbortController();
-            try{fallback=await providers.classifyWithModel({key:credentials.ollama,model,text:redact(input.text),signal:classifierController.signal});}
+            try{fallback=await providers.classifyWithModel({key:credentials.ollama,model,text:redact(input.text),context:classifierContext(s),signal:classifierController.signal});}
             catch{if(!closed&&!shuttingDown.value)store.audit(sessionId,'GUARDRAIL',{rule:'classifier_unavailable',fallback:'deterministic_clarification'});}
             finally{classifierController=null;}
           }
@@ -130,7 +131,7 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
           const result=engine.handle(sessionId,{...input,fallback});
           send('session',{session:result.session});
           if(result.duplicate)return;
-          const actionLabels={close_card:'Close the card',confirm_closure:'Confirm simulated closure',accept_offer:'Accept demo offer',decline_offer:'Decline and close',redeem_points:'Redeem demo points',skip:'Skip this step',resume_closure:'Continue closure',select_identity:'Confirm matched demo profile',confirm_identity:'Confirm my profile',register_profile:'Create a synthetic profile',save_profile:'Save profile',cancel_registration:'Cancel registration'};
+          const actionLabels={close_card:'Close the card',confirm_closure:'Confirm simulated closure',accept_offer:'Accept demo offer',decline_offer:'Decline and close',redeem_points:'Redeem demo points',skip:'Skip this step',resume_closure:'Continue closure',select_identity:'Confirm matched demo profile',confirm_identity:'Confirm my profile',register_profile:'Create a synthetic profile',save_profile:'Save profile',cancel_registration:'Cancel registration',security_support:'Help with the lost card',security_close:'Continue permanent account closure'};
           send('user_text',{text:redact(input.text||actionLabels[input.action]||input.action)});
           void speakReply(result.reply);
         }catch(error){if(!closed&&!shuttingDown.value){fail(error.message);const latest=store.get(sessionId);if(latest)send('session',{session:engine.view(latest)});}}

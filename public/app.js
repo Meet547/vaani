@@ -112,7 +112,7 @@ function renderSession(value, { transcript = false, omitLast = false } = {}) {
   $('identity-note').textContent = value.customer?`${value.customer.name}${value.customer.last4?` · demo card ending ${value.customer.last4}`:''} · demo profile matched · conversation saved`:'Tell Aria your name to find the right demo profile.';
   if(value.customer&&customerCatalog.some(c=>c.id===value.customer.id)){$('customer').value = value.customer.id;if(selectedProfile?.id!==value.customer.id)loadSelectedProfile();else profileSessionNote();}
   $('trigger').value = value.trigger;
-  if(transcript){const actionLabels={close_card:'Close the card',confirm_closure:'Confirm simulated closure',accept_offer:'Accept demo offer',decline_offer:'Decline and close',redeem_points:'Redeem demo points',skip:'Skip this step',resume_closure:'Continue closure',select_identity:'Confirm matched demo profile',confirm_identity:'Confirm my profile',register_profile:'Create a synthetic profile',save_profile:'Save profile',cancel_registration:'Cancel registration'};clearTranscript();for(const item of value.transcript.slice(0,omitLast?-1:undefined))addMessage(item.role,item.role==='user'?(actionLabels[item.text]||item.text):item.text);}
+  if(transcript){const actionLabels={close_card:'Close the card',confirm_closure:'Confirm simulated closure',accept_offer:'Accept demo offer',decline_offer:'Decline and close',redeem_points:'Redeem demo points',skip:'Skip this step',resume_closure:'Continue closure',select_identity:'Confirm matched demo profile',confirm_identity:'Confirm my profile',register_profile:'Create a synthetic profile',save_profile:'Save profile',cancel_registration:'Cancel registration',security_support:'Help with the lost card',security_close:'Continue permanent account closure'};clearTranscript();for(const item of value.transcript.slice(0,omitLast?-1:undefined))addMessage(item.role,item.role==='user'?(actionLabels[item.text]||item.text):item.text);}
   $('decision-facts').replaceChildren(); $('quick-actions').replaceChildren();
   const fact=(label,text)=>{const row=document.createElement('p'),name=document.createElement('b');name.textContent=label+' ';row.append(name,document.createTextNode(String(text)));$('decision-facts').append(row);};
   const button=(label,action,kind='',choice=null)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.className=`quick-action ${kind}`;b.addEventListener('click',()=>performAction(action,choice));$('quick-actions').append(b);};
@@ -131,6 +131,11 @@ function renderSession(value, { transcript = false, omitLast = false } = {}) {
     if(value.customer.id.startsWith('NEW-')&&!customerCatalog.some(c=>c.id===value.customer.id))refreshDirectory().catch(()=>{});
   }else if(value.state==='CHECK_CONTEXT'){
     $('decision-title').textContent='Your saved request';fact('Profile',value.customer.name);fact('Next step','Is the request Aria mentioned what you want help with today?');button('Yes, that’s the issue','answer_yes');button('Something else','answer_no','quiet');
+  }else if(value.state==='CARD_SECURITY'){
+    $('decision-title').textContent='Lost-card help or account closure?';
+    fact('Important','This demo cannot block or replace a real card. Contact the issuer immediately for a real lost card.');
+    fact('Your choice','Help with the lost card, or permanent closure of the card account.');
+    button('Help with lost card','security_support');button('Continue permanent account closure','security_close','quiet');
   }else if(value.state==='DECIDE'&&value.offer){
     $('decision-title').textContent='Your demo offer';const o=value.offer;
     fact('Option',o.id.replace('CARD_','').replaceAll('_',' ').toLowerCase());
