@@ -347,7 +347,3 @@ async function initializeApp(){try {
 } catch { showError('Could not reach the server. Please refresh or check the deployment connection.'); $('connection').textContent = 'Server unavailable'; }
 finally{updateControls();}}
 await initializeApp();
-  }catch(error){$('access-error').textContent=error.message;}
-  finally{$('access-submit').disabled=false;}
-});
-await initializeApp();
