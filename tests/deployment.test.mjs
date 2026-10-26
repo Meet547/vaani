@@ -27,6 +27,13 @@ test('voice tickets are origin-bound, expire and cannot be replayed',()=>{
   assert.equal(tickets.consume(token,'https://vaani.example'),'session-secret');assert.equal(tickets.consume(token,'https://vaani.example'),null);
   const old=tickets.issue('other','https://vaani.example');now=60001;assert.equal(tickets.consume(old,'https://vaani.example'),null);
 });
+test('the supplied project URLs are allowed only on their configured backend, with exact origin matching',()=>{
+  const project=loadDeployment({...env,PUBLIC_BACKEND_URL:'https://vaani-backend-vv52.onrender.com',FRONTEND_ORIGINS:'https://vaani-backend-vv52.onrender.com'});
+  assert.deepEqual(project.frontendOrigins,['https://vaani-backend-vv52.onrender.com','https://vaaniai-git-main-meet547s-projects.vercel.app']);
+  assert.equal(project.frontendOrigins.includes('https://unrelated.vercel.app'),false);
+  assert.deepEqual(loadDeployment(env).frontendOrigins,['https://vaani.example']);
+  assert.throws(()=>loadDeployment({...env,PUBLIC_BACKEND_URL:'https://vaani-backend-vv52.onrender.com',FRONTEND_ORIGINS:'https://*.vercel.app'}));
+});
 test('Vercel build publishes only frontend assets, proxies API requests and allows direct secure voice',async t=>{
   const outputDirectory=await mkdtemp(join(tmpdir(),'vaani-build-'));t.after(()=>rm(outputDirectory,{recursive:true,force:true}));
   const config=await buildFrontend({backendUrl:env.PUBLIC_BACKEND_URL,outputDirectory});

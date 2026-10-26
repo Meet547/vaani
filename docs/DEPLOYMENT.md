@@ -16,6 +16,10 @@ Decide the Vercel project name or custom domain first. The backend needs its exa
 
 Render can start with the intended frontend origin before the frontend is live. If Vercel assigns a different hostname, update `FRONTEND_ORIGINS` on Render before testing the app.
 
+The existing project allowlist is saved in `config/deployment.json`: the Render app itself and `https://vaaniai-git-main-meet547s-projects.vercel.app`. Render merges those exact origins with `FRONTEND_ORIGINS` only when its public backend matches the configured `backendUrl`. Other backends require their own explicit environment allowlist. This keeps the current Render-only demo working and permits the supplied Vercel hostname without a wildcard. To remove a project origin, remove it from both the file and any environment value.
+
+The supplied Vercel branch URL currently redirects visitors to a Vercel login. A successful deployment does not remove that platform-level protection. Use the public Production domain shown on the Vercel project, and add its exact origin to `FRONTEND_ORIGINS` before testing it. See [Vercel Authentication](https://vercel.com/docs/deployment-protection/methods-to-protect-deployments/vercel-authentication) for the environment-specific access settings. The repository allowlist does not bypass Vercel's login.
+
 ## 2. Create the Render backend
 
 In Render, choose **New → Blueprint**, connect `Meet547/vaani`, and use the root `render.yaml`.

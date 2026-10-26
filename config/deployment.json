@@ -1,3 +1,7 @@
 {
-  "backendUrl": "https://vaani-backend-vv52.onrender.com"
+  "backendUrl": "https://vaani-backend-vv52.onrender.com",
+  "frontendOrigins": [
+    "https://vaani-backend-vv52.onrender.com",
+    "https://vaaniai-git-main-meet547s-projects.vercel.app"
+  ]
 }
