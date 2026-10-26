@@ -1,6 +1,6 @@
 {
   "name": "vaani",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Thoughtful voice conversations for a synthetic banking sandbox, with policy-controlled card flows and a Vercel/Render deployment.",
   "private": true,
   "type": "module",

@@ -29,7 +29,11 @@ The voice is meant to feel warm and natural. Aria identifies herself as a virtua
 
 ## Try a conversation
 
-Pick a customer from the directory, choose **New demo session**, then speak or type. Chat works without provider keys; live speech needs Sarvam. The screen keeps the offer, checklist and written result alongside the conversation.
+Choose **New conversation**, or just say/type hello. Aria asks for your name, finds matching records, and confirms the right person before reading card details. If a saved issue exists, she checks whether it is still what you need help with today. Duplicate names require a full name, city or an explicit selection.
+
+If your name is new, Aria can collect a name, optional city and short enquiry, review the details with you, then save a synthetic profile in SQLite after confirmation. The profile is available in later conversations and survives restarts. New enquiry profiles have no invented card balances or offer eligibility.
+
+Chat works without provider keys; live speech needs Sarvam. To run the preloaded walkthroughs below, choose **Test a selected customer scenario** and open the profile settings. Normal conversation stays the default and never adopts a CSV trigger on its own.
 
 <details open>
 <summary><strong>“The annual fee is too high.” — Riya</strong></summary>
@@ -63,6 +67,7 @@ Search for **H-LR-1**, or choose **Gold only** in the product filter. Enquiry, l
 
 - **A voice with room to breathe.** Three Sarvam voices, adjustable pace, streaming playback, microphone echo suppression and interruption handling.
 - **One conversation across voice and chat.** Typed messages, spoken turns and on-screen actions share the same policy engine and saved session.
+- **A name before an account.** Record lookup, duplicate-name handling and reviewed registration keep the conversation tied to the right profile. This is synthetic profile matching, not real bank authentication.
 - **Decisions grounded in code.** Fees, eligibility, offer caps and closure transitions come from validated facts and rules. Ollama only helps classify unfamiliar wording; it cannot approve an action or invent financial terms.
 - **A visible finish.** Explicit confirmations, written references, saved snapshots and an audit trail make it possible to follow what happened.
 - **A useful dataset.** Search 250 synthetic profiles by name, ID or city. There are 160 card profiles, 110 with gold details and 20 in both groups. Of the card profiles, 148 are ready for a demo; the other 12 show their data/status issues.
@@ -144,6 +149,6 @@ SQLite and short-lived tickets currently belong to one backend instance. Use a s
 
 ## Keep reading
 
-[Deployment](docs/DEPLOYMENT.md) · [Local development](docs/LOCAL_DEVELOPMENT.md) · [Demo walkthrough](docs/DEMO_GUIDE.md) · [CSV mapping](docs/CSV_INTEGRATION.md) · [Implementation decisions](docs/IMPLEMENTATION_NOTES.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
+[Deployment](docs/DEPLOYMENT.md) · [Customer onboarding](docs/CUSTOMER_ONBOARDING.md) · [Local development](docs/LOCAL_DEVELOPMENT.md) · [Demo walkthrough](docs/DEMO_GUIDE.md) · [CSV mapping](docs/CSV_INTEGRATION.md) · [Implementation decisions](docs/IMPLEMENTATION_NOTES.md) · [Security](SECURITY.md) · [Contributing](CONTRIBUTING.md)
 
 The original [card rulebook](docs/source/card_closure_rulebook.md) and [voice/chat brief](docs/source/card_retention_agent_voice_chat.md) are preserved for reference. Executable policy lives in YAML and code; editing a brief alone does not change the running assistant.

@@ -24,8 +24,10 @@ function setState(value) {
 function showError(message) { $('error').textContent = message; $('error').hidden = false; }
 function clearError() { $('error').hidden = true; }
 function send(type, data = {}) { if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type, ...data })); }
-function options() { return { voice: $('voice').value, language: $('language').value, pace: Number($('pace').value), customerId: $('customer').value, trigger: $('trigger').value }; }
-function cardReady(){return configured&&!profileLoading&&selectedProfile?.id===$('customer').value&&selectedProfile.canStartCard;}
+const conversational=()=>$('journey-mode').value==='conversation';
+function options() { return { mode:$('journey-mode').value,voice: $('voice').value, language: $('language').value, pace: Number($('pace').value), ...(conversational()?{trigger:'customer_message'}:{customerId: $('customer').value,trigger:$('trigger').value}) }; }
+function cardReady(){return configured&&(conversational()||(!profileLoading&&selectedProfile?.id===$('customer').value&&selectedProfile.canStartCard));}
+function canResume(){return Boolean(sessionSnapshot&&sessionSnapshot.journeyMode===$('journey-mode').value&&(conversational()||sessionSnapshot.customer?.id===$('customer').value));}
 const rupees=n=>n===null||n===undefined?'Not supplied':new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
 function filterCustomers(){
   const selected=$('customer').value,query=$('customer-search').value.trim().toLowerCase(),segment=$('segment-filter').value;
@@ -34,7 +36,7 @@ function filterCustomers(){
   const append=(c,parent)=>{const option=document.createElement('option');option.value=c.id;option.textContent=`${c.name} · ${c.id} · ${c.city||'synthetic'}${c.canStartCard?'':' · read-only'}`;parent.append(option);};
   const current=customerCatalog.find(c=>c.id===selected);
   if(current&&!matches.some(c=>c.id===selected)){const group=document.createElement('optgroup');group.label='Current selection (outside filter)';append(current,group);$('customer').append(group);}
-  for(const [value,label] of [['card_only','Card only'],['card_and_gold','Card + gold'],['gold_only','Gold only · read-only']]){
+  for(const [value,label] of [['card_only','Card only'],['card_and_gold','Card + gold'],['gold_only','Gold only · read-only'],['new_customer','Saved enquiry profiles']]){
     const group=document.createElement('optgroup');group.label=label;
     for(const c of matches.filter(c=>c.segment===value))append(c,group);
     if(group.children.length)$('customer').append(group);
@@ -59,7 +61,7 @@ async function loadSelectedProfile({defaults=false}={}){
     const c=await response.json();if(request!==profileRequest||id!==$('customer').value)return;
     selectedProfile=c;$('customer-profile').hidden=false;
     $('profile-name').textContent=c.name;$('profile-meta').textContent=`${c.id} · ${c.city} · ${c.segment.replaceAll('_',' ')} · synthetic`;
-    $('profile-description').textContent=`CSV scenario note (reference only): ${c.description}`;$('profile-status').textContent=c.canStartCard?'CARD DEMO READY':'READ-ONLY';
+    $('profile-description').textContent=`${c.segment==='new_customer'?'Saved profile note':'CSV scenario note (reference only)'}: ${c.description}`;$('profile-status').textContent=c.canStartCard?'CARD DEMO READY':'READ-ONLY';
     $('profile-warnings').replaceChildren();
     for(const [messages,blocking] of [[c.blockingReasons,true],[c.warnings,false]])for(const message of messages){const p=document.createElement('p');p.className=`profile-warning${blocking?' blocking':''}`;p.textContent=message;$('profile-warnings').append(p);}
     $('card-profile').hidden=!c.card;$('gold-profile').hidden=!c.gold;
@@ -68,7 +70,7 @@ async function loadSelectedProfile({defaults=false}={}){
     if(c.gold){const g=c.gold,pct=n=>n===null?'Not supplied':`${n}%`;profileFacts('gold-profile-facts',[
       ['Enquiry date',g.enquiryOn||'Not supplied'],['Requested amount',rupees(g.gold_enquiry_amount)],['Existing loan',g.loanId?`${g.loanType} · ${g.loanId}`:'Not supplied'],['Loan outstanding',rupees(g.loan_outstanding)],['Current loan rate',pct(g.loan_rate_pct)],['Monthly EMI',rupees(g.loan_emi)],['Loan tenure',g.loan_tenure_months===null?'Not supplied':`${g.loan_tenure_months} months`],['Repayment profile',g.repaymentQuality||'Not supplied'],['Stated rival rate',pct(g.rival_rate_pct_stated)],['Requested rate',pct(g.customer_ask_rate_pct)],['Collateral gold',g.collateral_gold_grams===null?'Not supplied':`${g.collateral_gold_grams} g`],['Collateral value',rupees(g.collateral_value)]]);}
     $('profile-language').textContent=`Source language: ${{en:'English',hi:'Hindi',mr:'Marathi'}[c.language]||c.language}. Card suffixes and mandate labels are generated demo labels; the CSV contains no card-number suffixes or mandate names.`;
-    if(defaults){$('language').value=c.language==='hi'?'hi-IN':'en-IN';$('trigger').value=c.scenario.trigger;}
+    if(defaults&&!conversational()){$('language').value=c.language==='hi'?'hi-IN':'en-IN';$('trigger').value=c.scenario.trigger;}
     if(!sessionSnapshot)$('identity-note').textContent=c.canStartCard?'Selected CSV profile is ready. Start a new card demo or type a message.':'This profile is read-only. Choose a ready card customer to start a conversation.';
     profileSessionNote();
   }catch(error){if(error.name!=='AbortError'&&request===profileRequest){$('customer-profile').hidden=true;showError(error.message);}}
@@ -82,7 +84,8 @@ function updateControls() {
   $('interrupt').disabled = !active;
   for (const id of ['voice', 'language', 'pace']) $(id).disabled = active || connecting;
   for (const id of ['customer','customer-search','segment-filter']) $(id).disabled=connecting||!configured;
-  $('trigger').disabled=connecting||!cardReady();
+  $('trigger').disabled=connecting||conversational()||!cardReady();$('journey-mode').disabled=connecting;
+  $('new-session').textContent=conversational()?'New conversation':'New scenario session';
   $('clear').disabled = connecting;
   $('new-session').disabled = connecting||!cardReady();
   $('message').disabled=connecting||(!active&&!cardReady());$('send').disabled=connecting||(!active&&!cardReady());
@@ -105,15 +108,30 @@ function renderSession(value, { transcript = false, omitLast = false } = {}) {
   sessionSnapshot = value; savedSession = value;
   $('decision-panel').hidden = false; $('inspector').hidden = false;
   $('state-badge').textContent = value.state==='CLOSED'?'REQUEST SAVED':value.state.replaceAll('_',' ');
-  $('identity-note').textContent = `${value.customer.name} · card ending ${value.customer.last4} · synthetic identity verified · session saved locally`;
-  $('customer').value = value.customer.id; $('trigger').value = value.trigger;
-  if(selectedProfile?.id!==value.customer.id)loadSelectedProfile();else profileSessionNote();
-  if(transcript){const actionLabels={close_card:'Close the card',confirm_closure:'Confirm simulated closure',accept_offer:'Accept demo offer',decline_offer:'Decline and close',redeem_points:'Redeem demo points',skip:'Skip this step',resume_closure:'Continue closure'};clearTranscript();for(const item of value.transcript.slice(0,omitLast?-1:undefined))addMessage(item.role,item.role==='user'?(actionLabels[item.text]||item.text):item.text);}
+  $('journey-mode').value=value.journeyMode||'scenario';
+  $('identity-note').textContent = value.customer?`${value.customer.name}${value.customer.last4?` · demo card ending ${value.customer.last4}`:''} · demo profile matched · conversation saved`:'Tell Aria your name to find the right demo profile.';
+  if(value.customer&&customerCatalog.some(c=>c.id===value.customer.id)){$('customer').value = value.customer.id;if(selectedProfile?.id!==value.customer.id)loadSelectedProfile();else profileSessionNote();}
+  $('trigger').value = value.trigger;
+  if(transcript){const actionLabels={close_card:'Close the card',confirm_closure:'Confirm simulated closure',accept_offer:'Accept demo offer',decline_offer:'Decline and close',redeem_points:'Redeem demo points',skip:'Skip this step',resume_closure:'Continue closure',select_identity:'Confirm matched demo profile',confirm_identity:'Confirm my profile',register_profile:'Create a synthetic profile',save_profile:'Save profile',cancel_registration:'Cancel registration'};clearTranscript();for(const item of value.transcript.slice(0,omitLast?-1:undefined))addMessage(item.role,item.role==='user'?(actionLabels[item.text]||item.text):item.text);}
   $('decision-facts').replaceChildren(); $('quick-actions').replaceChildren();
   const fact=(label,text)=>{const row=document.createElement('p'),name=document.createElement('b');name.textContent=label+' ';row.append(name,document.createTextNode(String(text)));$('decision-facts').append(row);};
-  const button=(label,action,kind='')=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.className=`quick-action ${kind}`;b.addEventListener('click',()=>performAction(action));$('quick-actions').append(b);};
+  const button=(label,action,kind='',choice=null)=>{const b=document.createElement('button');b.type='button';b.textContent=label;b.className=`quick-action ${kind}`;b.addEventListener('click',()=>performAction(action,choice));$('quick-actions').append(b);};
   const rupees=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
-  if(value.state==='DECIDE'&&value.offer){
+  if(!value.verified){
+    const phase=value.identity?.phase;
+    $('decision-title').textContent=phase==='REVIEW'?'Review your new profile':['CITY','ISSUE','REGISTER_NAME'].includes(phase)?'Your new demo profile':'Let’s find your profile';
+    const hints={NAME:'Tell Aria your name to find the right demo profile.',CONFIRM:'Confirm the matched name and city, or choose a different profile.',CHOOSE:'Share your full name or city, or choose the right match.',OFFER_REGISTRATION:'You can create a synthetic profile if you want to save your enquiry.',REGISTER_NAME:'Tell Aria the full name to save.',CITY:'Share your city, or say skip.',ISSUE:'Describe what you need help with using synthetic details.',REVIEW:'Save only if these details are correct.'};
+    fact('Next step',hints[phase]||'Continue the conversation with Aria.');
+    if(['CHOOSE','CONFIRM'].includes(value.identity?.phase))for(const c of value.identity.candidates)button(`${c.name}${c.city?' · '+c.city:''}`,'select_identity','',c.id);
+    if(['CHOOSE','CONFIRM'].includes(value.identity?.phase))button('None of these · new profile','register_profile','quiet');
+    if(value.identity?.phase==='OFFER_REGISTRATION')button('Create a synthetic profile','register_profile');
+    if(value.identity?.phase==='REVIEW'){const d=value.identity.draft;fact('Name',d.name);fact('City',d.city||'Not supplied');fact('Your enquiry',d.issue);button('Save profile','save_profile');button('Cancel','cancel_registration','quiet');}
+  }else if(!value.hasCard){
+    $('decision-title').textContent='Your enquiry profile';fact('Name',value.customer.name);fact('Profile ID',value.customer.id);if(value.supportIssue)fact('Saved enquiry',value.supportIssue);fact('Account details','No validated card details are linked.');
+    if(value.customer.id.startsWith('NEW-')&&!customerCatalog.some(c=>c.id===value.customer.id))refreshDirectory().catch(()=>{});
+  }else if(value.state==='CHECK_CONTEXT'){
+    $('decision-title').textContent='Your saved request';fact('Profile',value.customer.name);fact('Next step','Is the request Aria mentioned what you want help with today?');button('Yes, that’s the issue','answer_yes');button('Something else','answer_no','quiet');
+  }else if(value.state==='DECIDE'&&value.offer){
     $('decision-title').textContent='Your demo offer';const o=value.offer;
     fact('Option',o.id.replace('CARD_','').replaceAll('_',' ').toLowerCase());
     if(o.amount!==undefined)fact('Fee amount',rupees(o.amount));
@@ -150,9 +168,9 @@ function renderSession(value, { transcript = false, omitLast = false } = {}) {
   fetch('/api/alerts').then(r=>r.ok?r.json():null).then(data=>{if(data&&sessionSnapshot?.id===value.id){const list=[...data.closures.map(c=>`${c.reference}: ${c.overdue?'overdue':'due soon'} (${c.status})`),...data.reviews.map(c=>`${c.id}: review due; no automatic approval`)];$('deadline-list').textContent=list.join('\n')||'No deadline alerts.';}}).catch(()=>{});
   updateControls();
 }
-async function performAction(action){
+async function performAction(action,choice=null){
   if(connecting||!sessionSnapshot)return;
-  try{if(!active)await startSession(true,true);clearError();interrupt();send('action',{action,token:action==='confirm_closure'?sessionSnapshot.confirmationToken:undefined,messageId:crypto.randomUUID(),expectedRevision:sessionSnapshot.revision});}
+  try{if(!active)await startSession(true,true);clearError();interrupt();const common={messageId:crypto.randomUUID(),expectedRevision:sessionSnapshot.revision};if(action==='answer_yes'||action==='answer_no')send('text',{text:action==='answer_yes'?'Yes':'No',...common});else send('action',{action,choice,token:action==='confirm_closure'?sessionSnapshot.confirmationToken:undefined,...common});}
   catch{}
 }
 async function ensureAudio() {
@@ -296,7 +314,7 @@ function stopSession() {
   $('partial').textContent = ''; setState('idle'); updateControls();
 }
 $('call').addEventListener('click', () => {
-  if (active && !textOnly) stopSession(); else startSession(false,Boolean(sessionSnapshot&&sessionSnapshot.customer.id===$('customer').value)).catch(() => {});
+  if (active && !textOnly) stopSession(); else startSession(false,canResume()).catch(() => {});
 });
 $('mute').addEventListener('click', () => {
   muted = !muted; media?.getAudioTracks().forEach(track => { track.enabled = !muted; });
@@ -306,15 +324,15 @@ $('mute').addEventListener('click', () => {
 });
 $('interrupt').addEventListener('click', () => interrupt());
 $('clear').addEventListener('click', () => { stopSession(); clearTranscript(); $('latency').textContent = 'Designed to listen.'; $('duration').textContent = '00:00'; clearError(); });
-$('resume').addEventListener('click',()=>{sessionSnapshot=savedSession;$('customer-search').value='';$('segment-filter').value='all';filterCustomers();$('customer').value=savedSession.customer.id;loadSelectedProfile();startSession(true,true).catch(()=>{});});
+$('resume').addEventListener('click',()=>{sessionSnapshot=savedSession;$('journey-mode').value=savedSession.journeyMode||'scenario';$('customer-search').value='';$('segment-filter').value='all';filterCustomers();if(savedSession.customer&&customerCatalog.some(c=>c.id===savedSession.customer.id)){$('customer').value=savedSession.customer.id;loadSelectedProfile();}startSession(true,true).catch(()=>{});});
 $('new-session').addEventListener('click',()=>{stopSession();sessionSnapshot=null;savedSession=null;clearTranscript();$('decision-panel').hidden=true;$('inspector').hidden=true;$('resume').hidden=true;startSession(true,false).catch(()=>{});});
-for(const id of ['customer','trigger'])$(id).addEventListener('change',()=>{stopSession();sessionSnapshot=null;clearTranscript();clearError();$('decision-panel').hidden=true;$('inspector').hidden=true;$('identity-note').textContent='New synthetic scenario selected. Start a conversation or type a message.';if(id==='customer'){filterCustomers();loadSelectedProfile({defaults:true});}});
+for(const id of ['customer','trigger','journey-mode'])$(id).addEventListener('change',()=>{if(conversational()&&id!=='journey-mode'){if(id==='customer'){filterCustomers();loadSelectedProfile();}return;}stopSession();sessionSnapshot=null;clearTranscript();clearError();$('decision-panel').hidden=true;$('inspector').hidden=true;$('identity-note').textContent='Start a fresh conversation or type a message.';if(id==='journey-mode')$('scenario-tools').open=!conversational();if(id==='customer'||id==='journey-mode'){filterCustomers();loadSelectedProfile({defaults:true});}updateControls();});
 for(const id of ['customer-search','segment-filter'])$(id).addEventListener('input',filterCustomers);
 $('pace').addEventListener('input', () => { $('pace-value').textContent = `${Number($('pace').value).toFixed(2)}×`; });
 $('text-form').addEventListener('submit', async event => {
   event.preventDefault(); const text = $('message').value.trim(); if (!text || connecting || !configured) return;
   $('send').disabled = true;
-  try { if (!active) await startSession(true,Boolean(sessionSnapshot&&sessionSnapshot.customer.id===$('customer').value)); else interrupt(); clearError(); send('text', { text, messageId:crypto.randomUUID(),expectedRevision:sessionSnapshot?.revision }); $('message').value = ''; }
+  try { if (!active) await startSession(true,canResume()); else interrupt(); clearError(); send('text', { text, messageId:crypto.randomUUID(),expectedRevision:sessionSnapshot?.revision }); $('message').value = ''; }
   catch {} finally { updateControls(); }
 });
 setInterval(() => {
@@ -333,6 +351,12 @@ setInterval(() => {
 }, 130);
 window.addEventListener('pagehide', stopSession);
 $('backup-player').addEventListener('play',()=>{if(active)stopSession();});
+let directoryRefresh=null;
+function refreshDirectory(){
+  if(directoryRefresh)return directoryRefresh;
+  directoryRefresh=(async()=>{const response=await fetch('/api/config');if(!response.ok)throw new Error('Could not refresh customer profiles.');const info=await response.json();customerCatalog=info.customers;filterCustomers();if(info.dataset){const d=info.dataset;$('dataset-summary').textContent=`${d.total} source profiles · ${info.savedProfiles||0} new enquiry profiles · ${d.cardReady} ready card scenarios`;}if(sessionSnapshot?.customer&&customerCatalog.some(c=>c.id===sessionSnapshot.customer.id)){$('customer').value=sessionSnapshot.customer.id;await loadSelectedProfile();}return info;})().finally(()=>{directoryRefresh=null;});
+  return directoryRefresh;
+}
 async function initializeApp(){try {
   const accessResponse=await fetch('/api/access');if(!accessResponse.ok)throw new Error();
   const access=await accessResponse.json();
@@ -341,7 +365,7 @@ async function initializeApp(){try {
   const response = await fetch('/api/config'); if (!response.ok) throw new Error();
   const info = await response.json(); voiceAvailable = info.voiceAvailable; configured = true;
   customerCatalog=info.customers;filterCustomers();
-  if(info.dataset){const d=info.dataset;$('dataset-summary').textContent=`${d.total} profiles · ${d.cardProfiles} with cards · ${d.goldProfiles} with gold details · ${d.cardReady} ready for card demos`;}
+  if(info.dataset){const d=info.dataset;$('dataset-summary').textContent=`${d.total} source profiles · ${info.savedProfiles||0} new enquiry profiles · ${d.cardReady} ready card scenarios`;}
   await loadSelectedProfile({defaults:true});
   $('connection').replaceChildren(); const dot = document.createElement('i');
   $('connection').append(dot, voiceAvailable ? 'Demo voice ready' : 'Chat ready · voice keys needed');

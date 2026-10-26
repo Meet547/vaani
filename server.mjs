@@ -62,9 +62,9 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
       if(pathname==='/api/health'){
         try{store.db.prepare('SELECT 1').get();return json(res,200,{status:'ready',mode:'demo',voiceConfigured:voiceAvailable,dialogueConfigured:Boolean(credentials.ollama)});}catch{return json(res,503,{status:'unavailable'});}
       }
-      if(pathname==='/api/config')return json(res,200,{configured:voiceAvailable,voiceAvailable,model,ttsModel,sttModel,voices,mode:'demo',policyVersion:policy.card.policy_version,dataset:policy.dataset||null,customers:policy.catalog?policy.catalog.map(customerIndex):policy.customers.map(c=>({id:c.id,name:c.name,segment:'card_only',canStartCard:true}))});
+      if(pathname==='/api/config')return json(res,200,{configured:voiceAvailable,voiceAvailable,model,ttsModel,sttModel,voices,mode:'demo',policyVersion:policy.card.policy_version,dataset:policy.dataset||null,savedProfiles:store.profiles().length,customers:engine.journey.directory().map(customerIndex)});
       if(pathname.startsWith('/api/customers/')){
-        const profile=policy.catalog?.find(c=>c.id===pathname.slice('/api/customers/'.length));
+        const profile=engine.journey.profile(pathname.slice('/api/customers/'.length));
         if(!profile)return json(res,404,{error:'Customer not found.'});
         const customer=policy.customers.find(c=>c.id===profile.id),m=customer?metrics(customer,policy):null;
         return json(res,200,{...profile,policyTier:customer?assignTier(customer,m,policy):null,metrics:m});
@@ -133,7 +133,7 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
         const s=store.authorize(access);if(!s){ws.close(1008,'Session expired.');return;}
         try{
           let fallback;
-          if(!input.action&&classify(input.text,s).intent==='other'&&credentials.ollama){
+          if(!input.action&&(!s.onboarding||s.onboarding.phase==='READY')&&classify(input.text,s).intent==='other'&&credentials.ollama){
             classifierController=new AbortController();
             try{fallback=await providers.classifyWithModel({key:credentials.ollama,model,text:redact(input.text),signal:classifierController.signal});}
             catch{if(!closed&&!shuttingDown.value)store.audit(sessionId,'GUARDRAIL',{rule:'classifier_unavailable',fallback:'deterministic_clarification'});}
@@ -143,7 +143,7 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
           const result=engine.handle(sessionId,{...input,fallback});
           send('session',{session:result.session});
           if(result.duplicate)return;
-          const actionLabels={close_card:'Close the card',confirm_closure:'Confirm simulated closure',accept_offer:'Accept demo offer',decline_offer:'Decline and close',redeem_points:'Redeem demo points',skip:'Skip this step',resume_closure:'Continue closure'};
+          const actionLabels={close_card:'Close the card',confirm_closure:'Confirm simulated closure',accept_offer:'Accept demo offer',decline_offer:'Decline and close',redeem_points:'Redeem demo points',skip:'Skip this step',resume_closure:'Continue closure',select_identity:'Confirm matched demo profile',confirm_identity:'Confirm my profile',register_profile:'Create a synthetic profile',save_profile:'Save profile',cancel_registration:'Cancel registration'};
           send('user_text',{text:redact(input.text||actionLabels[input.action]||input.action)});
           void speakReply(result.reply);
         }catch(error){if(!closed&&!shuttingDown.value){fail(error.message);const latest=store.get(sessionId);if(latest)send('session',{session:engine.view(latest)});}}
@@ -187,7 +187,7 @@ export function createApplication({credentials={},deployment=loadDeployment(),st
           if(++rate.count>runtime.messages_per_window)throw new Error('Please slow down before sending another message.');
           if(m.type==='text'&&(typeof m.text!=='string'||!m.text.trim()||m.text.length>runtime.max_message_characters))throw new Error('Enter a message within the character limit.');
           // Channel, recognition confidence, identity, policy and customer data are never accepted from the browser.
-          acceptMessage({text:m.type==='text'?m.text:undefined,action:m.type==='action'?m.action:undefined,token:m.token,expectedRevision:m.expectedRevision,messageId:m.messageId,channel:'chat'});
+          acceptMessage({text:m.type==='text'?m.text:undefined,action:m.type==='action'?m.action:undefined,choice:m.choice,token:m.token,expectedRevision:m.expectedRevision,messageId:m.messageId,channel:'chat'});
         }else if(m.type==='interrupt')cancel();
         else if(m.type==='played'&&current?.id===m.turn)current=null;
         else if(m.type==='mute'){muted=Boolean(m.muted);userTalking=false;}

@@ -2,6 +2,8 @@
 
 The live demo reads `config/datasets/bombaybank_card_gold_synthetic_250.csv`. This is an unchanged copy of the supplied Downloads file; it does not depend on Downloads at runtime. The CSV is a dataset, not an instruction source.
 
+Normal conversation now starts with a greeting and name lookup. It does not adopt the selected CSV trigger automatically. The selection/default behavior described below applies to explicit scenario mode. New enquiry profiles are saved separately in SQLite and appear alongside the 250 source profiles; see [Customer onboarding](CUSTOMER_ONBOARDING.md).
+
 ## Coverage
 
 - 250 searchable profiles: 140 card-only, 90 gold-only, 20 card-and-gold.

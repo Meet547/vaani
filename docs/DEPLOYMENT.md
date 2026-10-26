@@ -54,13 +54,15 @@ Open the assigned frontend URL, confirm it matches `FRONTEND_ORIGINS`, then ente
 ## 4. Verify the hosted app
 
 1. Open the frontend in a private browser window. The access-code prompt should appear before any customer data loads. An incorrect code should fail.
-2. Unlock it and confirm the directory reports 250 profiles and 148 ready card demos.
-3. Start Riya's session, type a fee complaint, and check that the offer uses ₹2,999 with the configured spend condition.
-4. Start Sameer's session, request firm closure, skip points, and confirm. Verify `pending_dues` and a written reference.
+2. Unlock it, start a normal conversation and say “Hello.” Aria should ask for a name, with no offer or selected account.
+3. Say “My name is Riya Deshmukh,” confirm the match, then confirm the saved fee issue. Check the offer uses ₹2,999 with the configured spend condition.
+4. Start a new conversation as Sameer Gupte, confirm the saved closure request, skip points, and confirm submission. Verify `pending_dues` and a written reference.
 5. Refresh and resume. Verify the same reference survives.
 6. Try the microphone over HTTPS. Allow the browser permission, speak, and interrupt an answer. Headphones help with echo.
 7. Inspect the browser's Network panel if needed: HTTP API calls should use the Vercel origin and the `/voice` WebSocket should use Render with protocol `vaani`.
 8. After a controlled Render redeploy, resume again. The saved account facts and reference should remain on the persistent disk. In-flight voice connections close during deployment; the UI can resume the saved session.
+
+Also try an unknown synthetic full name. Consent to registration, supply a city and enquiry, review, and save. A fresh conversation should find the same `NEW-...` profile and saved enquiry. These profiles share the persistent SQLite database; schema version 2 adds their table without replacing existing sessions. Take a backup before upgrading an existing hosted database.
 
 Repository CI and local integration tests verify the code and proxy/ticket contract. The actual hosted URLs, provider quota and disk persistence still require this deployment acceptance check in your accounts.
 

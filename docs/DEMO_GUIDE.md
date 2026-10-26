@@ -2,7 +2,9 @@
 
 CSV integration verification: **53 automated tests passed**. The original live text-to-speech, synthetic speech-to-text/barge-in, and Ollama fallback checks passed; the CSV browser walkthrough also received live speech. Browser testing confirmed the imported points step, a `pending_dues` closure, explicit submission, gold-only restrictions and invalid-balance restrictions. See `CSV_INTEGRATION.md` for the mapping and source data issues. The previous dependency audit reported 0 known vulnerabilities; this integration adds no dependency.
 
-Start the app, select a customer and choose **New demo session**. Every run is synthetic. Use the buttons for a predictable walkthrough, or type/speak the sample customer phrases.
+The default is **Talk naturally · find me by name**. Start with “Hello,” then “My name is Riya Deshmukh.” Confirm the match and decide whether the saved fee issue is relevant. “Hello” alone must never produce an offer. An unknown full name can enter the name/city/enquiry registration flow; nothing is saved until the review is confirmed.
+
+For the scenario table below, choose **Test a selected customer scenario**, expand the profile settings, select a customer and choose **New scenario session**. Every run is synthetic. Use the buttons or type/speak the sample phrases.
 
 | Scenario | Actions | Expected result |
 | --- | --- | --- |

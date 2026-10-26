@@ -80,7 +80,7 @@ test('voice provider failure preserves the written reply and saved policy state'
 });
 test('intent provider failure yields a safe clarification without an offer or action',async t=>{
   const x=await setup(t,{credentials:{ollama:'test-only'},providers:{classifyWithModel:async()=>{throw new Error('unavailable');}}}),s=await x.session(),c=await connect(x,s.cookie);t.after(()=>c.socket.close());
-  c.send({type:'text',text:'hello there',messageId:'unknown'});const r=await c.wait('session');assert.equal(r.session.offerCount,0);assert.equal(r.session.state,'ANALYSE');assert.ok(r.session.trace.some(e=>e.detail.rule==='classifier_unavailable'));
+  c.send({type:'text',text:'something quite unusual',messageId:'unknown'});const r=await c.wait('session');assert.equal(r.session.offerCount,0);assert.equal(r.session.state,'ANALYSE');assert.ok(r.session.trace.some(e=>e.detail.rule==='classifier_unavailable'));
 });
 test('provider language confidence never turns uncertain spoken yes into a closure',async t=>{
   let event;
@@ -88,4 +88,23 @@ test('provider language confidence never turns uncertain spoken yes into a closu
   const x=await setup(t,{credentials:{sarvam:'test-only'},providers}),s=await x.session(),c=await connect(x,s.cookie,false);t.after(()=>c.socket.close());
   c.send({type:'text',text:'just close it',messageId:'close'});assert.equal((await c.wait('session')).session.closureStep,'confirm');await c.wait('turn_done');
   event({event:'transcript.final',text:'yes',language_confidence:1,utterance_idx:0});const r=await c.wait('session');assert.equal(r.session.state,'CLOSURE_FLOW');assert.equal(x.store.db.prepare('SELECT COUNT(*) AS n FROM closures').get().n,0);assert.ok(r.session.trace.some(e=>e.detail.rule==='voice_reconfirmation'));
+});
+test('normal conversation transport greets, identifies by name and ignores client identity spoofing',async t=>{
+  let modelCalls=0;const x=await setup(t,{policy:loadPolicy(),credentials:{ollama:'test-only'},providers:{classifyWithModel:async()=>{modelCalls++;throw new Error('Should not classify identity');}}});
+  const response=await fetch(x.origin+'/api/sessions',{method:'POST',headers:{Origin:x.origin,'Content-Type':'application/json'},body:JSON.stringify({mode:'conversation',customerId:'H-CARD-1',trigger:'card_closure_request'})});
+  const created=await response.json();assert.equal(created.session.customer,null);assert.equal(created.session.state,'AWAITING_NAME');
+  const c=await connect(x,response.headers.get('set-cookie').split(';')[0]);t.after(()=>c.socket.close());
+  c.send({type:'text',text:'Hello.',customerId:'H-CARD-1',verified:true});let r=await c.wait('session');assert.equal(r.session.customer,null);assert.equal(r.session.offerCount,0);await c.wait('turn_done');
+  c.send({type:'text',text:'My name is Riya Deshmukh.'});r=await c.wait('session');assert.equal(r.session.state,'CONFIRM_IDENTITY');assert.ok(!r.session.trace.some(e=>e.kind==='SERVICE'));await c.wait('turn_done');
+  c.send({type:'text',text:"Yes, that's me."});r=await c.wait('session');assert.equal(r.session.customer.id,'H-CARD-1');assert.equal(r.session.state,'CHECK_CONTEXT');assert.equal(r.session.offerCount,0);assert.equal(modelCalls,0);
+});
+test('normal conversation saves reviewed synthetic profiles and exposes them in the directory',async t=>{
+  const x=await setup(t,{policy:loadPolicy()});
+  const response=await fetch(x.origin+'/api/sessions',{method:'POST',headers:{Origin:x.origin,'Content-Type':'application/json'},body:'{"mode":"conversation"}'});
+  const c=await connect(x,response.headers.get('set-cookie').split(';')[0]);t.after(()=>c.socket.close());
+  let latest;
+  for(const text of ['My name is Kavya DemoPerson','yes','Pune','I need help with annual card fees.','yes']){c.send({type:'text',text});latest=(await c.wait('session')).session;await c.wait('turn_done');}
+  assert.equal(latest.state,'PROFILE_READY');assert.equal(latest.hasCard,false);assert.equal(latest.offerCount,0);
+  const config=await fetch(x.origin+'/api/config').then(r=>r.json());assert.equal(config.savedProfiles,1);assert.equal(config.customers.length,251);
+  const profile=await fetch(x.origin+'/api/customers/'+latest.customer.id).then(r=>r.json());assert.equal(profile.name,'Kavya DemoPerson');assert.equal(profile.card,null);assert.equal(profile.canStartCard,false);
 });

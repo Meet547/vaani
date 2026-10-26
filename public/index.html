@@ -12,6 +12,8 @@
     <section id="access-panel" class="access-panel" aria-labelledby="access-title" hidden><p class="eyebrow">WELCOME TO VAANI</p><h2 id="access-title">Your invitation to the demo.</h2><p>Enter the access code shared by the host to explore the synthetic accounts and try Aria’s voice.</p><form id="access-form"><label for="access-code">Demo access code</label><div><input id="access-code" type="password" required maxlength="256" autocomplete="off"><button id="access-submit" class="secondary-button" type="submit">Open the demo</button></div><p id="access-error" role="alert"></p></form></section>
     <div id="app-content" hidden>
     <section class="intro"><div><p class="eyebrow">A LITTLE MORE HUMAN</p><h1>A conversation,<br><em>naturally.</em></h1></div><p class="intro-copy">Meet Aria. A thoughtful voice that listens,<br class="desktop"> understands, and takes it one turn at a time.</p></section>
+    <section class="conversation-setup" aria-label="Conversation setup"><div><label for="journey-mode">How would you like to start?</label><select id="journey-mode"><option value="conversation">Talk naturally · find me by name</option><option value="scenario">Test a selected customer scenario</option></select></div><div class="session-buttons"><button id="resume" class="secondary-button" hidden>Resume saved conversation</button><button id="new-session" class="secondary-button">New conversation</button></div><p>Say hello, then tell Aria your name. New profiles are saved only after you confirm the details. Use synthetic information for this demo.</p></section>
+    <details id="scenario-tools" class="scenario-tools"><summary>Explore customer profiles and scenario settings</summary>
     <section class="customer-directory" aria-label="Customer directory">
       <div class="directory-heading"><div><p class="eyebrow">SYNTHETIC CUSTOMER DIRECTORY</p><h2>One profile. The right conversation.</h2></div><p id="dataset-summary" role="status">Loading customer dataset…</p></div>
       <div class="directory-filters"><div><label for="customer-search">Find a customer</label><input id="customer-search" type="search" placeholder="Search name, ID or city" maxlength="100"></div><div><label for="segment-filter">Products</label><select id="segment-filter"><option value="all">All customers</option><option value="card_only">Card only</option><option value="gold_only">Gold only · read-only</option><option value="card_and_gold">Card + gold</option><option value="ready">Ready for card demo</option><option value="review">Card records needing review</option><option value="heroes">Hero scenarios</option></select></div></div>
@@ -20,7 +22,6 @@
     <section class="demo-toolbar" aria-label="Synthetic demo setup">
       <div class="scenario-select"><label for="customer">Synthetic customer</label><select id="customer" disabled><option value="">Loading profiles…</option></select></div>
       <div class="scenario-select"><label for="trigger">Entry path</label><select id="trigger"><option value="customer_message">Customer conversation</option><option value="card_closure_request">Closure request</option><option value="downgrade_request">Downgrade request</option><option value="usage_drop">Usage drop · proactive</option><option value="churn_score_high">Churn signal · proactive</option></select></div>
-      <div class="session-buttons"><button id="resume" class="secondary-button" hidden>Resume saved session</button><button id="new-session" class="secondary-button">New demo session</button></div>
       <p id="identity-note">Synthetic accounts only. Identity verification is simulated by the demo orchestrator.</p>
     </section>
     <section id="customer-profile" class="customer-profile" aria-label="Selected customer profile" hidden>
@@ -29,6 +30,7 @@
       <div class="profile-grid"><div id="card-profile" hidden><h3>Card snapshot</h3><dl id="card-profile-facts"></dl></div><div id="gold-profile" hidden><h3>Gold enquiry &amp; existing loan <span>Read-only</span></h3><dl id="gold-profile-facts"></dl><p class="directory-note">Source facts only. Gold offers, rates, applications and valuation bookings are not enabled.</p></div></div>
       <p id="profile-language" class="directory-note"></p><p id="profile-session-note" class="directory-note"></p>
     </section>
+    </details>
     <div class="workspace">
       <section class="call-panel" aria-label="Voice call">
         <div class="panel-top"><span class="live-tag"><i></i> LIVE CONVERSATION</span><span id="duration">00:00</span></div>

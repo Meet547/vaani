@@ -96,7 +96,7 @@ test('points counter is capped and action whitelist rejects unreturned or modifi
 test('fraud and human intent override negotiation; open fraud ticket hands off immediately',t=>{
   const x=setup(t);x.send('The fee is high');const r=x.send('I did not make this transaction.');assert.equal(r.session.state,'HANDOFF');assert.equal(r.session.cases[0].queue,'fraud');
   const n=x.engine.create({customerId:'H-CARD-3'});assert.equal(n.session.state,'HANDOFF');assert.equal(n.session.offerCount,0);
-  const y=x.engine.create();assert.equal(x.engine.handle(y.session.id,{text:'agent please'}).session.cases[0].queue,'relationship_manager');
+  const y=x.engine.create({customerId:'H-CARD-1'});assert.equal(x.engine.handle(y.session.id,{text:'agent please'}).session.cases[0].queue,'relationship_manager');
 });
 test('identity and bureau-consent gates fail closed',t=>{
   const x=setup(t,'H-CARD-4');assert.equal(x.engine.services.fetch_cibil(x.state()),null);
@@ -122,7 +122,7 @@ test('PII is redacted before persistence and hash chaining detects altered event
 });
 test('sessions and audit survive database restart; cookie secret is stored only as a hash',()=>{
   const directory=mkdtempSync(join(tmpdir(),'aria-test-')),path=join(directory,'demo.sqlite');
-  try{let store=new Store(path),engine=new CardEngine(store,policy);const created=engine.create();engine.handle(created.session.id,{text:'I want to close my card'});store.close();
+  try{let store=new Store(path),engine=new CardEngine(store,policy);const created=engine.create({customerId:'H-CARD-1'});engine.handle(created.session.id,{text:'I want to close my card'});store.close();
     store=new Store(path);engine=new CardEngine(store,policy);assert.equal(store.authorize(created.access).state,'FIND_REASON');assert.ok(store.verifyAudit(created.session.id));
     assert.ok(!JSON.stringify(store.db.prepare('SELECT * FROM sessions').get()).includes(created.access));assert.equal(engine.resume(created.session.id).reasonQuestions,1);store.close();
   }finally{rmSync(directory,{recursive:true,force:true});}
